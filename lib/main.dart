@@ -1,4 +1,4 @@
-import 'package:codepunk/pages/authPages/logInPage.dart';
+import 'package:codepunk/mainWidget.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'firebase_options.dart';
@@ -12,7 +12,7 @@ Future<void> main() async {
   runApp(
     const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: logInPage(),
+      home: mainWidget(),
     ),
   ); //runApp
 }
