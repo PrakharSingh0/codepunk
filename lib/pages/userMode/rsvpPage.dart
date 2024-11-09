@@ -1,3 +1,4 @@
+import 'package:codepunk/pages/userMode/puzzlePage.dart';
 import 'package:flutter/material.dart';
 
 class rsvpPage extends StatelessWidget {
@@ -5,6 +6,19 @@ class rsvpPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: Text("load BC"),),);
+    return Scaffold(
+      body: Center(heightFactor: 20,
+        child: Column(
+          children: [
+            const Text(
+                "This is here is to inform you that you are participaring \n in the CodePunk event held by Driod Club"),
+            const SizedBox(height: 20,),
+            ElevatedButton(onPressed: () {
+              Navigator.push(context,MaterialPageRoute(builder: (context)=>const puzzlePage()));
+            }, child: const Text("I, RSVP"))
+          ],
+        ),
+      ),
+    );
   }
 }
