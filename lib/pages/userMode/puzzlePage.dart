@@ -27,6 +27,12 @@ class _puzzlePageState extends State<puzzlePage> {
     });
   }
 
+  void _resetErrorMessage() {
+    setState(() {
+      _errorMessage = "";
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,6 +52,7 @@ class _puzzlePageState extends State<puzzlePage> {
                 labelText: 'Your Answer',
                 errorText: _errorMessage.isNotEmpty ? _errorMessage : null,
               ),
+              onTap: _resetErrorMessage, // Reset error message on tap
             ),
             const SizedBox(height: 20),
             ElevatedButton(
