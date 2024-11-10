@@ -1,5 +1,5 @@
 import 'package:codepunk/pages/authPages/logInPage.dart';
-import 'package:codepunk/pages/userMode/coutDownPage.dart';
+import 'package:codepunk/pages/userMode/countDownPage.dart';
 import 'package:codepunk/pages/userMode/problemStatementPage.dart';
 import 'package:codepunk/pages/userMode/puzzlePage.dart';
 import 'package:codepunk/pages/userMode/rsvpPage.dart';
@@ -36,7 +36,7 @@ class _mainWidgetState extends State<mainWidget> {
     const rsvpPage(),
     const puzzlePage(),
     const problemStatementPage(),
-    const countDownPage()
+    const countDownPage(psid: '', problemStatement: '',)
   ];
 
   void changePage(int index) {

@@ -1,3 +1,4 @@
+import 'package:codepunk/pages/userMode/countDownPage.dart';
 import 'package:flutter/material.dart';
 
 class problemStatementPage extends StatefulWidget {
@@ -12,10 +13,10 @@ class _problemStatementPageState extends State<problemStatementPage> {
   bool is_confirmed = false;
 
   final List<Map<String, String>> problemStatements = [
-    {'Problem Statement': 'Network Issue', 'Status': 'Open'},
-    {'Problem Statement': 'Login Failure', 'Status': 'Closed'},
-    {'Problem Statement': 'Database Error', 'Status': 'Open'},
-    {'Problem Statement': 'API Timeout', 'Status': 'Closed'},
+    {'Problem Statement': 'ok 1', 'Status': 'Open'},
+    {'Problem Statement': 'ok 2', 'Status': 'Closed'},
+    {'Problem Statement': 'ok 2', 'Status': 'Open'},
+    {'Problem Statement': 'ok 4', 'Status': 'Closed'},
   ];
 
   void _onCheckboxChanged(int index, bool? value) {
@@ -51,9 +52,12 @@ class _problemStatementPageState extends State<problemStatementPage> {
                 children: [
                   DataTable(
                     dataRowColor: WidgetStateProperty.resolveWith<Color?>(
-                          (Set<WidgetState> states) => states.contains(WidgetState.selected) ? Colors.orange : null,
+                          (Set<WidgetState> states) => states.contains(WidgetState.selected)
+                          ? Colors.orange
+                          : null,
                     ),
-                    columns: List.generate(5, (index) => DataColumn(label: Text(_getColumnHeader(index), style: AppTextStyles.defaultTextStyle()))),
+                    columns: List.generate(5, (index) =>
+                        DataColumn(label: Text(_getColumnHeader(index), style: AppTextStyles.defaultTextStyle()))),
                     rows: List<DataRow>.generate(
                       problemStatements.length,
                           (index) => DataRow(
@@ -96,10 +100,18 @@ class _problemStatementPageState extends State<problemStatementPage> {
                     ButtonStyle(
                       backgroundColor:
                       WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) =>
-                      states.contains(WidgetState.disabled) ? Colors.grey[300] : (s_index != null && is_confirmed) ? Colors.orange : Colors.white),
+                      states.contains(WidgetState.disabled)
+                          ? Colors.grey[300]
+                          : (s_index != null && is_confirmed)
+                          ? Colors.orange
+                          : Colors.white),
                       foregroundColor:
                       WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) =>
-                      states.contains(WidgetState.disabled) ? Colors.black : (s_index != null && is_confirmed) ? Colors.white : Colors.black),
+                      states.contains(WidgetState.disabled)
+                          ? Colors.black
+                          : (s_index != null && is_confirmed)
+                          ? Colors.white
+                          : Colors.black),
                     ),
                     child:
                     Text("Proceed to Confirm", style: AppTextStyles.buttonTextStyle()),
@@ -152,8 +164,18 @@ class _problemStatementPageState extends State<problemStatementPage> {
         actions:
         [
           TextButton(
-            onPressed:
-                () => Navigator.of(context).pop(),
+            onPressed: () {
+              // Pass PSID and Problem Statement to countDownPage
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => countDownPage(
+                    psid: 'CP-${s_index! + 1}', // Pass PSID
+                    problemStatement: problemStatements[s_index!]['Problem Statement']!, // Pass Problem Statement
+                  ),
+                ),
+              );
+            },
             child:
             Text("OK", style:
             AppTextStyles.confirmationTextStyle().copyWith(color: Colors.white)),
