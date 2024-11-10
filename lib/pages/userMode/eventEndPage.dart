@@ -10,6 +10,10 @@ class eventEndPage extends StatefulWidget {
 class _eventEndPageState extends State<eventEndPage> {
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return const Scaffold(
+      body: Center(
+        child: Text("Event Ended, Thanks for Joining"),
+      ),
+    );
   }
 }

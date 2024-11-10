@@ -1,4 +1,4 @@
-import 'package:codepunk/pages/userMode/problemStatementPage.dart';
+import 'package:codepunk/pages/userMode/eventEndPage.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -33,7 +33,7 @@ class _countDownPageState extends State<countDownPage> {
         _timer.cancel();
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const problemStatementPage()),
+          MaterialPageRoute(builder: (context) => const eventEndPage()),
         );
       }
     });
@@ -90,9 +90,9 @@ class _countDownPageState extends State<countDownPage> {
             ],
           ),
           const SizedBox(height: 20),
-          Row(
+          Column(
             crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
                 'PSID: ${widget.psid}\n',
