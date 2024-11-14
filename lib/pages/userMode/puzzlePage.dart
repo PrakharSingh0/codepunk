@@ -1,3 +1,4 @@
+import 'package:codepunk/backgroundWidget.dart';
 import 'package:codepunk/pages/userMode/problemStatementPage.dart';
 import 'package:flutter/material.dart';
 
@@ -35,31 +36,36 @@ class _puzzlePageState extends State<puzzlePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              'What is the answer to life, the universe, and everything?',
-              style: TextStyle(fontSize: 18),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: _answerController,
-              decoration: InputDecoration(
-                labelText: 'Your Answer',
-                errorText: _errorMessage.isNotEmpty ? _errorMessage : null,
+    return Scaffold(
+      body: Stack(children: [
+        backgroundWidget(),
+        Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                'What is the answer to life, the universe, and everything?',
+                style: TextStyle(fontSize: 18),
+                textAlign: TextAlign.center,
               ),
-              onTap: _resetErrorMessage, // Reset error message on tap
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _checkAnswer,
-              child: const Text('Submit'),
-            ),
-          ],
+              const SizedBox(height: 20),
+              TextField(
+                controller: _answerController,
+                decoration: InputDecoration(
+                  labelText: 'Your Answer',
+                  errorText: _errorMessage.isNotEmpty ? _errorMessage : null,
+                ),
+                onTap: _resetErrorMessage, // Reset error message on tap
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _checkAnswer,
+                child: const Text('Submit'),
+              ),
+            ],
+          ),
         ),
+      ]),
     );
   }
 }

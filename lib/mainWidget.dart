@@ -16,7 +16,7 @@ class mainWidget extends StatefulWidget {
 
 class _mainWidgetState extends State<mainWidget> {
   late VideoPlayerController _controller;
-  static int currentPageIndex = 0;
+  static int currentPageIndex = 1;
 
   @override
   void initState() {
