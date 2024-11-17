@@ -16,21 +16,21 @@ class countDownPage extends StatefulWidget {
 }
 
 class _countDownPageState extends State<countDownPage> {
-  late Timer _timer; // Timer for countdown
-  late Timer _statusCheckTimer; // Timer for checking status
-  int _start = 10; // Default countdown time
-  bool _shouldStartTimer = false; // Flag to check if timer should start
+  late Timer _timer;
+  late Timer _statusCheckTimer;
+  int _start = 10;
+  bool _shouldStartTimer = false;
 
   @override
   void initState() {
     super.initState();
-    _checkTimerStatus(); // Initial check for timer status
-    _startStatusCheckTimer(); // Start checking status every 5 seconds
+    _checkTimerStatus();
+    _startStatusCheckTimer();
   }
 
   void _startStatusCheckTimer() {
     _statusCheckTimer = Timer.periodic(Duration(seconds: 5), (timer) {
-      _checkTimerStatus(); // Check the timer status from Firestore every 5 seconds
+      _checkTimerStatus();
     });
   }
 
@@ -41,14 +41,13 @@ class _countDownPageState extends State<countDownPage> {
         .get();
 
     if (snapshot.exists) {
-      bool startField = snapshot['Start'] ?? false; // Default to false if not found
+      bool startField = snapshot['Start'] ?? false;
       if (startField && !_shouldStartTimer) {
-        _shouldStartTimer = true; // Start timer only if startField is true
-        _startTimer(); // Start the countdown timer
+        _shouldStartTimer = true;
+        _startTimer();
       } else if (!startField) {
-        // Handle case where startField is false (e.g., show a message)
         setState(() {
-          _shouldStartTimer = false; // Ensure timer does not start
+          _shouldStartTimer = false;
         });
       }
     }
@@ -73,7 +72,7 @@ class _countDownPageState extends State<countDownPage> {
   @override
   void dispose() {
     _timer.cancel();
-    _statusCheckTimer.cancel(); // Cancel status check timer when disposing
+    _statusCheckTimer.cancel();
     super.dispose();
   }
 
