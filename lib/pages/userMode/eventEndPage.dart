@@ -12,12 +12,17 @@ class _eventEndPageState extends State<eventEndPage> {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-      body: Stack( children: [
-        backgroundWidget(),
-        Center(
-          child: Text("Event Ended, Thanks for Joining"),
-        ),
-      ],),
+      body: Stack(
+        children: [
+          backgroundWidget(),
+          Center(
+            child: Text(
+              "Event Ended, Thanks for Joining",
+              style: TextStyle(fontSize: 20, color: Colors.yellow),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
