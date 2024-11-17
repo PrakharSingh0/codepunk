@@ -29,7 +29,7 @@ class _countDownPageState extends State<countDownPage> {
   }
 
   void _startStatusCheckTimer() {
-    _statusCheckTimer = Timer.periodic(Duration(seconds: 5), (timer) {
+    _statusCheckTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
       _checkTimerStatus();
     });
   }
