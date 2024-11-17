@@ -1,3 +1,4 @@
+import 'package:codepunk/backgroundWidget.dart';
 import 'package:codepunk/pages/userMode/countDownPage.dart';
 import 'package:flutter/material.dart';
 
@@ -36,92 +37,91 @@ class _problemStatementPageState extends State<problemStatementPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text("Problem Statement Table", style: TextStyle(color: Colors.black)),
-        backgroundColor: Colors.white,
-      ),
-      body: Center(
-        child: SingleChildScrollView(
-          scrollDirection: Axis.vertical,
+      body: Stack(children: [
+        const backgroundWidget(),
+        Center(
           child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  DataTable(
-                    dataRowColor: WidgetStateProperty.resolveWith<Color?>(
-                          (Set<WidgetState> states) => states.contains(WidgetState.selected)
-                          ? Colors.orange
-                          : null,
-                    ),
-                    columns: List.generate(5, (index) =>
-                        DataColumn(label: Text(_getColumnHeader(index), style: AppTextStyles.defaultTextStyle()))),
-                    rows: List<DataRow>.generate(
-                      problemStatements.length,
-                          (index) => DataRow(
-                        selected: s_index == index,
-                        cells: [
-                          DataCell(
-                            CustomCheckbox(
-                              value: s_index == index,
-                              onChanged: problemStatements[index]['Status'] == 'Open'
-                                  ? (value) => _onCheckboxChanged(index, value)
-                                  : null,
-                              isEnabled: problemStatements[index]['Status'] == 'Open',
+            scrollDirection: Axis.vertical,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    DataTable(
+                      dataRowColor: WidgetStateProperty.resolveWith<Color?>(
+                            (Set<WidgetState> states) => states.contains(WidgetState.selected)
+                            ? Colors.orange
+                            : null,
+                      ),
+                      columns: List.generate(5, (index) =>
+                          DataColumn(label: Text(_getColumnHeader(index), style: AppTextStyles.defaultTextStyle()))),
+                      rows: List<DataRow>.generate(
+                        problemStatements.length,
+                            (index) => DataRow(
+                          selected: s_index == index,
+                          cells: [
+                            DataCell(
+                              CustomCheckbox(
+                                value: s_index == index,
+                                onChanged: problemStatements[index]['Status'] == 'Open'
+                                    ? (value) => _onCheckboxChanged(index, value)
+                                    : null,
+                                isEnabled: problemStatements[index]['Status'] == 'Open',
+                              ),
                             ),
-                          ),
-                          ..._getDataCells(index),
-                        ],
+                            ..._getDataCells(index),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 10,),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      const SizedBox(width: 65,),
-                      CustomCheckbox(
-                        value: is_confirmed && s_index != null,
-                        onChanged: s_index != null ? _onConfirmCheckboxChanged : null,
-                        isEnabled: s_index != null,
-                      ),
-                      Text("I confirm that the Problem Statement that I have chosen will not be changed.", style: AppTextStyles.defaultTextStyle()),
-                    ],
-                  ),
-                  ElevatedButton(
-                    onPressed:
-                    s_index != null && is_confirmed
-                        ? () => _showConfirmationDialog(context)
-                        : null,
-                    style:
-                    ButtonStyle(
-                      backgroundColor:
-                      WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) =>
-                      states.contains(WidgetState.disabled)
-                          ? Colors.grey[300]
-                          : (s_index != null && is_confirmed)
-                          ? Colors.orange
-                          : Colors.white),
-                      foregroundColor:
-                      WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) =>
-                      states.contains(WidgetState.disabled)
-                          ? Colors.black
-                          : (s_index != null && is_confirmed)
-                          ? Colors.white
-                          : Colors.black),
+                    const SizedBox(height: 10,),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        const SizedBox(width: 65,),
+                        CustomCheckbox(
+                          value: is_confirmed && s_index != null,
+                          onChanged: s_index != null ? _onConfirmCheckboxChanged : null,
+                          isEnabled: s_index != null,
+                        ),
+                        Text("I confirm that the Problem Statement that I have chosen will not be changed.", style: AppTextStyles.defaultTextStyle()),
+                      ],
                     ),
-                    child:
-                    Text("Proceed to Confirm", style: AppTextStyles.buttonTextStyle()),
-                  ),
-                ],
+                    ElevatedButton(
+                      onPressed:
+                      s_index != null && is_confirmed
+                          ? () => _showConfirmationDialog(context)
+                          : null,
+                      style:
+                      ButtonStyle(
+                        backgroundColor:
+                        WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) =>
+                        states.contains(WidgetState.disabled)
+                            ? Colors.grey[300]
+                            : (s_index != null && is_confirmed)
+                            ? Colors.orange
+                            : Colors.white),
+                        foregroundColor:
+                        WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) =>
+                        states.contains(WidgetState.disabled)
+                            ? Colors.black
+                            : (s_index != null && is_confirmed)
+                            ? Colors.white
+                            : Colors.black),
+                      ),
+                      child:
+                      Text("Proceed to Confirm", style: AppTextStyles.buttonTextStyle()),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
         ),
-      ),
+  ],),
     );
   }
 

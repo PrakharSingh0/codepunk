@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:codepunk/backgroundWidget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -93,7 +92,7 @@ class _logInPageState extends State<logInPage> {
     return Scaffold(
       body: Stack(
         children: [
-          backgroundWidget(),
+          const backgroundWidget(),
           Center(
             child: Column(
               children: [
