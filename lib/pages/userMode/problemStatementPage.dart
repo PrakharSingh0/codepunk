@@ -1,5 +1,3 @@
-import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:codepunk/backgroundWidget.dart';
 import 'package:codepunk/pages/userMode/countDownPage.dart';
 import 'package:flutter/material.dart';
@@ -12,151 +10,27 @@ class problemStatementPage extends StatefulWidget {
 }
 
 class _problemStatementPageState extends State<problemStatementPage> {
-  int? selectedIndex;
-  bool isConfirmed = false;
-  List<Map<String, dynamic>> problemStatements = [];
-  Timer? _timer;
+  int? s_index;
+  bool is_confirmed = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _fetchProblemStatements();
-    _startAutoRefresh();
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
-
-  void _startAutoRefresh() {
-    _timer = Timer.periodic(const Duration(seconds: 10), (timer) {
-      _fetchProblemStatements();
-    });
-  }
-
-  Future<void> _fetchProblemStatements() async {
-    QuerySnapshot snapshot =
-        await FirebaseFirestore.instance.collection('Problem_Statement').get();
-    setState(() {
-      problemStatements = snapshot.docs.map((doc) {
-        return {
-          'Problem Statement': doc['Title'] as String? ?? 'No Title',
-          'Status': doc['Status'] ? 'Open' : 'Closed',
-          'PSID': doc['ID'] as String? ?? 'No ID',
-          'Description': doc['Description'] as String? ?? 'No Description',
-          'DocID': doc.id,
-        } as Map<String, dynamic>;
-      }).toList();
-
-      problemStatements.sort((a, b) => a['PSID']!.compareTo(b['PSID']!));
-    });
-  }
+  final List<Map<String, String>> problemStatements = [
+    {'Problem Statement': 'ok 1', 'Status': 'Open'},
+    {'Problem Statement': 'ok 2', 'Status': 'Closed'},
+    {'Problem Statement': 'ok 2', 'Status': 'Open'},
+    {'Problem Statement': 'ok 4', 'Status': 'Closed'},
+  ];
 
   void _onCheckboxChanged(int index, bool? value) {
-    if (value == true) {
-      setState(() {
-        selectedIndex = index;
-        isConfirmed = false;
-      });
-    } else {
-      setState(() {
-        selectedIndex = null;
-      });
-    }
+    setState(() {
+      s_index = value == true ? index : null;
+      is_confirmed = false;
+    });
   }
 
   void _onConfirmCheckboxChanged(bool? value) {
     setState(() {
-      isConfirmed = value ?? false;
+      is_confirmed = value ?? false;
     });
-  }
-
-  void _showDetailsModal(int index) {
-    if (index < 0 || index >= problemStatements.length) return;
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return Container(
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.9),
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-          ),
-          padding: const EdgeInsets.all(16.0),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text("ID: ${problemStatements[index]['PSID']}",
-                    style: const TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                Text("Title: ${problemStatements[index]['Problem Statement']}",
-                    style: const TextStyle(fontSize: 16)),
-                const SizedBox(height: 8),
-                Text("Description: ${problemStatements[index]['Description']}",
-                    style: const TextStyle(fontSize: 14)),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Future<void> _showConfirmationDialog() async {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Confirm Selection"),
-        content:
-            const Text("Are you sure you want to proceed with this selection?"),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: const Text("Cancel"),
-          ),
-          TextButton(
-            onPressed: () async {
-              if (selectedIndex != null) {
-                String psid =
-                    problemStatements[selectedIndex!]['PSID'] ?? 'No PSID';
-                String problemStatement = problemStatements[selectedIndex!]
-                        ['Problem Statement'] ??
-                    'No Title';
-
-                await FirebaseFirestore.instance
-                    .collection('Problem_Statement')
-                    .doc(problemStatements[selectedIndex!]['DocID'])
-                    .update({'Status': false});
-
-                setState(() {
-                  problemStatements.removeAt(selectedIndex!);
-                  selectedIndex = null;
-                });
-                _fetchProblemStatements();
-                Navigator.pop(context);
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => countDownPage(
-                      psid: psid,
-                      problemStatement: problemStatement,
-                    ),
-                  ),
-                );
-              }
-            },
-            child: const Text("Confirm"),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -164,7 +38,7 @@ class _problemStatementPageState extends State<problemStatementPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(children: [
-        //const backgroundWidget(),
+        const backgroundWidget(),
         Center(
           child: SingleChildScrollView(
             scrollDirection: Axis.vertical,
@@ -177,94 +51,69 @@ class _problemStatementPageState extends State<problemStatementPage> {
                   children: [
                     DataTable(
                       dataRowColor: WidgetStateProperty.resolveWith<Color?>(
-                          (Set<WidgetState> states) =>
-                              states.contains(WidgetState.selected)
-                                  ? Colors.orange
-                                  : null),
-                      columns: List.generate(
-                          4,
-                          (index) => DataColumn(
-                              label: Text(_getColumnHeader(index),
-                                  style: AppTextStyles.defaultTextStyle()))),
+                            (Set<WidgetState> states) => states.contains(WidgetState.selected)
+                            ? Colors.orange
+                            : null,
+                      ),
+                      columns: List.generate(5, (index) =>
+                          DataColumn(label: Text(_getColumnHeader(index), style: AppTextStyles.defaultTextStyle()))),
                       rows: List<DataRow>.generate(
-                          problemStatements.length,
-                          (index) =>
-                              DataRow(selected: selectedIndex == index, cells: [
-                                DataCell(CustomCheckbox(
-                                  value: selectedIndex == index,
-                                  onChanged: problemStatements[index]
-                                              ['Status'] ==
-                                          'Open'
-                                      ? (value) =>
-                                          _onCheckboxChanged(index, value)
-                                      : null,
-                                  isEnabled: problemStatements[index]
-                                          ['Status'] ==
-                                      'Open',
-                                )),
-                                DataCell(GestureDetector(
-                                  onTap: () => _showDetailsModal(index),
-                                  child: Text(problemStatements[index]['PSID']!,
-                                      style: AppTextStyles.defaultTextStyle()),
-                                )),
-                                DataCell(GestureDetector(
-                                  onTap: () => _showDetailsModal(index),
-                                  child: Text(
-                                      problemStatements[index]
-                                          ['Problem Statement']!,
-                                      style: AppTextStyles.defaultTextStyle()),
-                                )),
-                                DataCell(Text(
-                                    problemStatements[index]['Status']!,
-                                    style: AppTextStyles.defaultTextStyle())),
-                              ])),
+                        problemStatements.length,
+                            (index) => DataRow(
+                          selected: s_index == index,
+                          cells: [
+                            DataCell(
+                              CustomCheckbox(
+                                value: s_index == index,
+                                onChanged: problemStatements[index]['Status'] == 'Open'
+                                    ? (value) => _onCheckboxChanged(index, value)
+                                    : null,
+                                isEnabled: problemStatements[index]['Status'] == 'Open',
+                              ),
+                            ),
+                            ..._getDataCells(index),
+                          ],
+                        ),
+                      ),
                     ),
-                    const SizedBox(
-                      height: 10,
-                    ),
+                    const SizedBox(height: 10,),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        const SizedBox(
-                          width: 65,
-                        ),
+                        const SizedBox(width: 65,),
                         CustomCheckbox(
-                          value: isConfirmed && selectedIndex != null,
-                          onChanged: selectedIndex != null
-                              ? _onConfirmCheckboxChanged
-                              : null,
-                          isEnabled: selectedIndex != null,
+                          value: is_confirmed && s_index != null,
+                          onChanged: s_index != null ? _onConfirmCheckboxChanged : null,
+                          isEnabled: s_index != null,
                         ),
-                        Text(
-                            "I confirm that the Problem Statement that I have chosen will not be changed.",
-                            style: AppTextStyles.defaultTextStyle()),
+                        Text("I confirm that the Problem Statement that I have chosen will not be changed.", style: AppTextStyles.defaultTextStyle()),
                       ],
                     ),
                     ElevatedButton(
-                      onPressed: selectedIndex != null && isConfirmed
-                          ? () => _showConfirmationDialog()
+                      onPressed:
+                      s_index != null && is_confirmed
+                          ? () => _showConfirmationDialog(context)
                           : null,
-                      style: ButtonStyle(
+                      style:
+                      ButtonStyle(
                         backgroundColor:
-                            WidgetStateProperty.resolveWith<Color?>(
-                                (Set<WidgetState> states) =>
-                                    states.contains(WidgetState.disabled)
-                                        ? Colors.grey[300]
-                                        : (selectedIndex != null && isConfirmed)
-                                            ? Colors.orange
-                                            : Colors.white),
+                        WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) =>
+                        states.contains(WidgetState.disabled)
+                            ? Colors.grey[300]
+                            : (s_index != null && is_confirmed)
+                            ? Colors.orange
+                            : Colors.white),
                         foregroundColor:
-                            WidgetStateProperty.resolveWith<Color?>(
-                                (Set<WidgetState> states) =>
-                                    states.contains(WidgetState.disabled)
-                                        ? Colors.black
-                                        : (selectedIndex != null && isConfirmed)
-                                            ? Colors.white
-                                            : Colors.black),
+                        WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) =>
+                        states.contains(WidgetState.disabled)
+                            ? Colors.black
+                            : (s_index != null && is_confirmed)
+                            ? Colors.white
+                            : Colors.black),
                       ),
-                      child: Text("Proceed to Confirm",
-                          style: AppTextStyles.buttonTextStyle()),
+                      child:
+                      Text("Proceed to Confirm", style: AppTextStyles.buttonTextStyle()),
                     ),
                   ],
                 ),
@@ -272,7 +121,7 @@ class _problemStatementPageState extends State<problemStatementPage> {
             ),
           ),
         ),
-      ]),
+  ],),
     );
   }
 
@@ -281,14 +130,59 @@ class _problemStatementPageState extends State<problemStatementPage> {
       case 0:
         return 'Select';
       case 1:
-        return 'PSID';
+        return 'S.No';
       case 2:
-        return 'Problem Statement';
+        return 'PSID';
       case 3:
+        return 'Problem Statement';
+      case 4:
         return 'Status';
       default:
         return '';
     }
+  }
+
+  List<DataCell> _getDataCells(int index) {
+    return [
+      DataCell(Text((index + 1).toString(), style: AppTextStyles.defaultTextStyle())),
+      DataCell(Text('CP-${index + 1}', style: AppTextStyles.defaultTextStyle())),
+      DataCell(Text(problemStatements[index]['Problem Statement']!, style: AppTextStyles.defaultTextStyle())),
+      DataCell(Text(problemStatements[index]['Status']!, style: AppTextStyles.defaultTextStyle())),
+    ];
+  }
+
+  void _showConfirmationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.orange,
+        title:
+        Text("Confirmed", style: AppTextStyles.confirmationTextStyle().copyWith(color: Colors.white)),
+        content:
+        Text("Your selection has been confirmed.", style:
+        AppTextStyles.confirmationTextStyle().copyWith(color: Colors.white)),
+        actions:
+        [
+          TextButton(
+            onPressed: () {
+              // Pass PSID and Problem Statement to countDownPage
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => countDownPage(
+                    psid: 'CP-${s_index! + 1}', // Pass PSID
+                    problemStatement: problemStatements[s_index!]['Problem Statement']!, // Pass Problem Statement
+                  ),
+                ),
+              );
+            },
+            child:
+            Text("OK", style:
+            AppTextStyles.confirmationTextStyle().copyWith(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -298,8 +192,7 @@ class AppTextStyles {
   }
 
   static TextStyle titleTextStyle() {
-    return defaultTextStyle(color: Colors.black)
-        .copyWith(fontSize: 20, fontWeight: FontWeight.bold);
+    return defaultTextStyle(color: Colors.black).copyWith(fontSize: 20, fontWeight: FontWeight.bold);
   }
 
   static TextStyle buttonTextStyle() {
@@ -317,11 +210,11 @@ class CustomCheckbox extends StatelessWidget {
   final bool isEnabled;
 
   const CustomCheckbox({
-    super.key,
+    Key? key,
     required this.value,
     required this.onChanged,
     this.isEnabled = true,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
