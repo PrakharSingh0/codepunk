@@ -3,6 +3,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:codepunk/backgroundWidget.dart';
 import 'package:codepunk/pages/userMode/problemStatementPage.dart';
+import 'dart:async'; // Import for Timer
 import 'dart:math';
 
 class puzzlePage extends StatefulWidget {
@@ -19,10 +20,15 @@ class _puzzlePageState extends State<puzzlePage> {
   String _question = "";
   bool _isLoading = true;
 
+  // Timer variables
+  Timer? _timer;
+  int _remainingTime = 70; // Set timer duration in seconds
+
   @override
   void initState() {
     super.initState();
     _fetchPuzzleQuestion();
+    _startTimer(); // Start the timer when the page is initialized
   }
 
   Future<void> _fetchPuzzleQuestion() async {
@@ -61,6 +67,24 @@ class _puzzlePageState extends State<puzzlePage> {
         _isLoading = false;
       });
     }
+  }
+
+  void _startTimer() {
+    // Start a countdown timer
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (_remainingTime > 0) {
+        setState(() {
+          _remainingTime--;
+        });
+      } else {
+        // Time's up, navigate to problemStatementPage
+        timer.cancel();
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const problemStatementPage()),
+        );
+      }
+    });
   }
 
   void _checkAnswer() async {
@@ -116,6 +140,19 @@ class _puzzlePageState extends State<puzzlePage> {
   }
 
   @override
+  void dispose() {
+    // Cancel the timer when disposing of the widget
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  String getFormattedTime(int totalSeconds) {
+    int minutes = totalSeconds ~/ 60; // Integer division for minutes
+    int seconds = totalSeconds % 60;   // Remainder for seconds
+    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}'; // Format as MM:SS
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(children: [
@@ -153,6 +190,20 @@ class _puzzlePageState extends State<puzzlePage> {
                 child: const Text('Submit'),
               ),
             ],
+          ),
+        ),
+
+        // Timer display at the top right corner
+        Positioned(
+          top: 40,
+          right: 20,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            color: Colors.black54,
+            child: Text(
+              'Time Left: ${getFormattedTime(_remainingTime)}',
+              style: const TextStyle(color: Colors.white, fontSize: 16),
+            ),
           ),
         ),
       ]),

@@ -31,7 +31,7 @@ class _problemStatementPageState extends State<problemStatementPage> {
   }
 
   void _startAutoRefresh() {
-    _timer = Timer.periodic(const Duration(seconds: 10), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 2), (timer) {
       _fetchProblemStatements();
     });
   }
