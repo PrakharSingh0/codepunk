@@ -20,15 +20,14 @@ class _puzzlePageState extends State<puzzlePage> {
   String _question = "";
   bool _isLoading = true;
 
-  // Timer variables
   Timer? _timer;
-  int _remainingTime = 70; // Set timer duration in seconds
+  int _remainingTime = 70;
 
   @override
   void initState() {
     super.initState();
     _fetchPuzzleQuestion();
-    _startTimer(); // Start the timer when the page is initialized
+    _startTimer();
   }
 
   Future<void> _fetchPuzzleQuestion() async {
@@ -70,14 +69,12 @@ class _puzzlePageState extends State<puzzlePage> {
   }
 
   void _startTimer() {
-    // Start a countdown timer
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       if (_remainingTime > 0) {
         setState(() {
           _remainingTime--;
         });
       } else {
-        // Time's up, navigate to problemStatementPage
         timer.cancel();
         Navigator.pushReplacement(
           context,
@@ -141,15 +138,14 @@ class _puzzlePageState extends State<puzzlePage> {
 
   @override
   void dispose() {
-    // Cancel the timer when disposing of the widget
     _timer?.cancel();
     super.dispose();
   }
 
   String getFormattedTime(int totalSeconds) {
-    int minutes = totalSeconds ~/ 60; // Integer division for minutes
-    int seconds = totalSeconds % 60;   // Remainder for seconds
-    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}'; // Format as MM:SS
+    int minutes = totalSeconds ~/ 60;
+    int seconds = totalSeconds % 60;
+    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
 
   @override
@@ -193,7 +189,6 @@ class _puzzlePageState extends State<puzzlePage> {
           ),
         ),
 
-        // Timer display at the top right corner
         Positioned(
           top: 40,
           right: 20,
