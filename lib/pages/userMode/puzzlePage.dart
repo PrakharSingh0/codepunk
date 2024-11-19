@@ -3,7 +3,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:codepunk/backgroundWidget.dart';
 import 'package:codepunk/pages/userMode/problemStatementPage.dart';
-import 'dart:async'; // Import for Timer
+import 'dart:async';
 import 'dart:math';
 
 class puzzlePage extends StatefulWidget {
