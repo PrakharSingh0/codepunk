@@ -5,7 +5,9 @@ import 'package:codepunk/pages/userMode/countDownPage.dart';
 import 'package:flutter/material.dart';
 
 class problemStatementPage extends StatefulWidget {
-  const problemStatementPage({super.key});
+  const problemStatementPage({super.key, required this.remainingTime});
+
+  final remainingTime;
 
   @override
   State<problemStatementPage> createState() => _problemStatementPageState();
@@ -24,12 +26,12 @@ class _problemStatementPageState extends State<problemStatementPage> {
     super.initState();
     _fetchProblemStatements();
     _startAutoRefresh();
+    _remainingTime = widget.remainingTime > 0 ? widget.remainingTime : 70;
     _startTimer();
   }
 
   void _startTimer() {
-    _timer = Timer.periodic(Duration(seconds: 1), (timer)
-    {
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       if (_remainingTime > 0) {
         setState(() {
           _remainingTime--;
@@ -52,7 +54,7 @@ class _problemStatementPageState extends State<problemStatementPage> {
 
   Future<void> _fetchProblemStatements() async {
     QuerySnapshot snapshot =
-    await FirebaseFirestore.instance.collection('Problem_Statement').get();
+        await FirebaseFirestore.instance.collection('Problem_Statement').get();
     setState(() {
       problemStatements = snapshot.docs.map((doc) {
         return {
@@ -124,56 +126,55 @@ class _problemStatementPageState extends State<problemStatementPage> {
   Future<void> _showConfirmationDialog() async {
     showDialog(
       context: context,
-      builder: (context) =>
-          AlertDialog(
-            title: const Text("Confirm Selection"),
-            content:
+      builder: (context) => AlertDialog(
+        title: const Text("Confirm Selection"),
+        content:
             const Text("Are you sure you want to proceed with this selection?"),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: const Text("Cancel"),
-              ),
-              TextButton(
-                onPressed: () async {
-                  if (selectedIndex != null) {
-                    String psid =
-                        problemStatements[selectedIndex!]['PSID'] ?? 'No PSID';
-                    String problemStatement = problemStatements[selectedIndex!]
-                    ['Problem Statement'] ??
-                        'No Title';
-
-                    await FirebaseFirestore.instance
-                        .collection('Problem_Statement')
-                        .doc(problemStatements[selectedIndex!]['DocID'])
-                        .update({'Status': false});
-
-                    setState(() {
-                      problemStatements.removeAt(selectedIndex!);
-                      selectedIndex = null;
-                    });
-                    _fetchProblemStatements();
-                    Navigator.pop(context);
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            countDownPage(
-                              psid: psid,
-                              problemStatement: problemStatement,
-                            ),
-                      ),
-                    );
-                  }
-                },
-                child: const Text("Confirm"),
-              ),
-            ],
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text("Cancel"),
           ),
+          TextButton(
+            onPressed: () async {
+              if (selectedIndex != null) {
+                String psid =
+                    problemStatements[selectedIndex!]['PSID'] ?? 'No PSID';
+                String problemStatement = problemStatements[selectedIndex!]
+                        ['Problem Statement'] ??
+                    'No Title';
+
+                await FirebaseFirestore.instance
+                    .collection('Problem_Statement')
+                    .doc(problemStatements[selectedIndex!]['DocID'])
+                    .update({'Status': false});
+
+                setState(() {
+                  problemStatements.removeAt(selectedIndex!);
+                  selectedIndex = null;
+                });
+                _fetchProblemStatements();
+                Navigator.pop(context);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => countDownPage(
+                      psid: psid,
+                      problemStatement: problemStatement,
+                    ),
+                  ),
+                );
+              }
+            },
+            child: const Text("Confirm"),
+          ),
+        ],
+      ),
     );
   }
+
   String getFormattedTime(int totalSeconds) {
     int minutes = totalSeconds ~/ 60;
     int seconds = totalSeconds % 60;
@@ -185,7 +186,7 @@ class _problemStatementPageState extends State<problemStatementPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(children: [
-        //const backgroundWidget(),
+        const backgroundWidget(),
         Center(
           child: SingleChildScrollView(
             scrollDirection: Axis.vertical,
@@ -198,31 +199,29 @@ class _problemStatementPageState extends State<problemStatementPage> {
                   children: [
                     DataTable(
                       dataRowColor: WidgetStateProperty.resolveWith<Color?>(
-                              (Set<WidgetState> states) =>
-                          states.contains(WidgetState.selected)
-                              ? Colors.orange
-                              : null),
+                          (Set<WidgetState> states) =>
+                              states.contains(WidgetState.selected)
+                                  ? Colors.orange
+                                  : null),
                       columns: List.generate(
                           4,
-                              (index) =>
-                              DataColumn(
-                                  label: Text(_getColumnHeader(index),
-                                      style: AppTextStyles
-                                          .defaultTextStyle()))),
+                          (index) => DataColumn(
+                              label: Text(_getColumnHeader(index),
+                                  style: AppTextStyles.defaultTextStyle()))),
                       rows: List<DataRow>.generate(
                           problemStatements.length,
-                              (index) =>
+                          (index) =>
                               DataRow(selected: selectedIndex == index, cells: [
                                 DataCell(CustomCheckbox(
                                   value: selectedIndex == index,
                                   onChanged: problemStatements[index]
-                                  ['Status'] ==
-                                      'Open'
+                                              ['Status'] ==
+                                          'Open'
                                       ? (value) =>
-                                      _onCheckboxChanged(index, value)
+                                          _onCheckboxChanged(index, value)
                                       : null,
                                   isEnabled: problemStatements[index]
-                                  ['Status'] ==
+                                          ['Status'] ==
                                       'Open',
                                 )),
                                 DataCell(GestureDetector(
@@ -234,7 +233,7 @@ class _problemStatementPageState extends State<problemStatementPage> {
                                   onTap: () => _showDetailsModal(index),
                                   child: Text(
                                       problemStatements[index]
-                                      ['Problem Statement']!,
+                                          ['Problem Statement']!,
                                       style: AppTextStyles.defaultTextStyle()),
                                 )),
                                 DataCell(Text(
@@ -270,21 +269,21 @@ class _problemStatementPageState extends State<problemStatementPage> {
                           : null,
                       style: ButtonStyle(
                         backgroundColor:
-                        WidgetStateProperty.resolveWith<Color?>(
+                            WidgetStateProperty.resolveWith<Color?>(
                                 (Set<WidgetState> states) =>
-                            states.contains(WidgetState.disabled)
-                                ? Colors.grey[300]
-                                : (selectedIndex != null && isConfirmed)
-                                ? Colors.orange
-                                : Colors.white),
+                                    states.contains(WidgetState.disabled)
+                                        ? Colors.grey[300]
+                                        : (selectedIndex != null && isConfirmed)
+                                            ? Colors.orange
+                                            : Colors.white),
                         foregroundColor:
-                        WidgetStateProperty.resolveWith<Color?>(
+                            WidgetStateProperty.resolveWith<Color?>(
                                 (Set<WidgetState> states) =>
-                            states.contains(WidgetState.disabled)
-                                ? Colors.black
-                                : (selectedIndex != null && isConfirmed)
-                                ? Colors.white
-                                : Colors.black),
+                                    states.contains(WidgetState.disabled)
+                                        ? Colors.black
+                                        : (selectedIndex != null && isConfirmed)
+                                            ? Colors.white
+                                            : Colors.black),
                       ),
                       child: Text("Proceed to Confirm",
                           style: AppTextStyles.buttonTextStyle()),

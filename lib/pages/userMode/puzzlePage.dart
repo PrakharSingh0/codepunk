@@ -21,7 +21,7 @@ class _puzzlePageState extends State<puzzlePage> {
   bool _isLoading = true;
 
   Timer? _timer;
-  int _remainingTime = 70;
+  int _remainingTime = 70; // Timer starts at 70 seconds
 
   @override
   void initState() {
@@ -78,7 +78,7 @@ class _puzzlePageState extends State<puzzlePage> {
         timer.cancel();
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const problemStatementPage()),
+          MaterialPageRoute(builder: (context) => const problemStatementPage(remainingTime: 0)),
         );
       }
     });
@@ -93,9 +93,10 @@ class _puzzlePageState extends State<puzzlePage> {
     }
 
     if (_answerController.text.trim().toLowerCase() == _correctAnswer.toLowerCase()) {
+      // Pass the remaining time to ProblemStatementPage
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const problemStatementPage()),
+        MaterialPageRoute(builder: (context) => problemStatementPage(remainingTime: _remainingTime)),
       );
     } else {
       setState(() {

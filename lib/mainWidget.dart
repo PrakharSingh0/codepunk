@@ -35,7 +35,7 @@ class _mainWidgetState extends State<mainWidget> {
     const logInPage(),
     const rsvpPage(),
     const puzzlePage(),
-    const problemStatementPage(),
+    const problemStatementPage(remainingTime: '',),
     const countDownPage(psid: '', problemStatement: '',)
   ];
 
