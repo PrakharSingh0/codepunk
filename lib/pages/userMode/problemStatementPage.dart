@@ -19,14 +19,14 @@ class _problemStatementPageState extends State<problemStatementPage> {
   List<Map<String, dynamic>> problemStatements = [];
 
   Timer? _timer;
-  int _remainingTime = 70;
+  late int _remainingTime;
 
   @override
   void initState() {
     super.initState();
     _fetchProblemStatements();
     _startAutoRefresh();
-    _remainingTime = widget.remainingTime > 0 ? widget.remainingTime : 70;
+    _remainingTime = widget.remainingTime+70;
     _startTimer();
   }
 
@@ -186,7 +186,7 @@ class _problemStatementPageState extends State<problemStatementPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(children: [
-        const backgroundWidget(),
+        //const backgroundWidget(),
         Center(
           child: SingleChildScrollView(
             scrollDirection: Axis.vertical,
