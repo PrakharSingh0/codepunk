@@ -30,7 +30,10 @@ class _backgroundWidgetState extends State<backgroundWidget> {
           child: SizedBox(
             width: _controller.value.size.width ?? 400,
             height: _controller.value.size.height ?? 1200,
-            child: VideoPlayer(_controller),
+            // child: VideoPlayer(_controller),
+            child: Container(
+              decoration: const BoxDecoration(gradient: LinearGradient(colors: [Colors.greenAccent,Colors.blueAccent])),
+            ),
           ),
         ),
       );

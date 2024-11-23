@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:codepunk/backgroundWidget.dart';
 import 'package:codepunk/pages/userMode/eventEndPage.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';

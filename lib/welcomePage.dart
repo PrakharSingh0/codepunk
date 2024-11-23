@@ -1,5 +1,6 @@
 import 'package:codepunk/backgroundWidget.dart';
 import 'package:codepunk/pages/authPages/logInPage.dart';
+import 'package:codepunk/pages/userMode/rsvpPage.dart';
 import 'package:flutter/material.dart';
 
 class welcomePage extends StatelessWidget {
@@ -17,9 +18,9 @@ class welcomePage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const Text("Welcome My Nigesh",style: TextStyle(color: Colors.white,fontSize: 32),),
+                const Text("Welcome To CodePunk",style: TextStyle(color: Colors.white,fontSize: 32),),
               ElevatedButton(onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const logInPage() ));
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const rsvpPage() ));
               }, child: const Text("Click me "))
               ],
             ),
