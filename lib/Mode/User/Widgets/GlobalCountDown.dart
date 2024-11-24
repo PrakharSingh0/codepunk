@@ -89,44 +89,44 @@ class _GlobalCountDownState extends State<GlobalCountDown> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 200,
-      height: 120,
-      decoration: BoxDecoration(
-        color: Colors.blueAccent,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: const [
-          BoxShadow(blurRadius: 8, color: Colors.black26, offset: Offset(0, 4))
-        ],
-      ),
-      child: isLoading
-          ? const Center(
-              child:
-                  CircularProgressIndicator()) // Show loading indicator while fetching data
-          : Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                isTimerStarted ? 'Event Ends In :' : 'Loading...',
-                style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white),
-              ),
-              const SizedBox(height: 0),
-              Text(
-                isTimerStarted
-                    ? formatDuration(remainingTime)
-                    : 'Loading...',
-                style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white),
-              ),
-            ],
-          ),
-    );
+        decoration: BoxDecoration(
+          color: Colors.blueAccent,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: const [
+            BoxShadow(
+                blurRadius: 8, color: Colors.black26, offset: Offset(0, 4))
+          ],
+        ),
+        child: isLoading
+            ? const Center(
+                child:
+                    CircularProgressIndicator()) // Show loading indicator while fetching data
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    isTimerStarted ? 'Event Ends In:' : 'Loading...',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(
+                      width: 10), // Add spacing between the text elements
+                  Text(
+                    isTimerStarted
+                        ? formatDuration(remainingTime)
+                        : 'Loading...',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ));
   }
-
   @override
   void dispose() {
     _timer?.cancel();

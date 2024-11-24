@@ -2,6 +2,7 @@ import 'dart:math'; // Import dart:math for random number generation
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:codepunk/Mode/User/Pages/ProblemStatementPage.dart';
 import 'package:codepunk/Mode/User/Widgets/GlobalCountDown.dart';
+import 'package:codepunk/Mode/User/Widgets/userDetailWidget.dart';
 import 'package:flutter/material.dart';
 
 class RiddlePage extends StatefulWidget {
@@ -55,7 +56,7 @@ class _RiddlePageState extends State<RiddlePage> {
       // Answer is correct, proceed to next page
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const Problemstatementpage()),
+        MaterialPageRoute(builder: (context) => const ProblemStatementPage()),
       );
     } else {
       setState(() {
@@ -81,6 +82,8 @@ class _RiddlePageState extends State<RiddlePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            userDetailWidget(),
+            SizedBox(height: 50,),
             GlobalCountDown(),
             // Display the riddle question
             Text(

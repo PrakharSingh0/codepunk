@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:codepunk/Auth/LoginScreen.dart';
 import 'package:codepunk/Mode/User/Pages/RSVP.dart';
 import 'package:flutter/material.dart';
 
@@ -31,7 +32,7 @@ class WelcomePage extends StatelessWidget {
           // If event time hasn't passed, navigate to the RSVP page
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const rsvpPage()),
+            MaterialPageRoute(builder: (context) => const LoginScreen()),
           );
         }
       } else {
