@@ -39,12 +39,7 @@ class _ProblemDetailsPageState extends State<ProblemDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        // Return false to prevent the back action
-        return false;
-      },
-      child: Scaffold(
+    return Scaffold(
         appBar: AppBar(
           title: const Text("Problem Details"),
           backgroundColor: Colors.blueAccent,
@@ -71,7 +66,7 @@ class _ProblemDetailsPageState extends State<ProblemDetailsPage> {
                   ],
                 ),
               ),
-      ),
+
     );
   }
 }

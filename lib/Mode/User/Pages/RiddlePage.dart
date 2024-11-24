@@ -1,9 +1,9 @@
-import 'dart:math'; // Import dart:math for random number generation
+import 'dart:async'; // Import for Timer
+import 'dart:math'; // Import for random number generation
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:codepunk/Mode/User/Pages/ProblemStatementPage.dart';
-import 'package:codepunk/Mode/User/Widgets/GlobalCountDown.dart';
-import 'package:codepunk/Mode/User/Widgets/userDetailWidget.dart';
 import 'package:flutter/material.dart';
+import 'package:codepunk/Mode/User/Pages/ProblemStatementPage.dart';
+import 'package:codepunk/Mode/User/Widgets/userDetailWidget.dart';
 
 class RiddlePage extends StatefulWidget {
   const RiddlePage({super.key});
@@ -19,17 +19,81 @@ class _RiddlePageState extends State<RiddlePage> {
   String errorMessage = '';
   bool isLoading = true;
 
+  Timer? countdownTimer;
+  Duration countdownDuration = Duration.zero; // Remaining time
+  DateTime? endTime; // End time fetched from Firestore
+
+  @override
+  void initState() {
+    super.initState();
+    fetchRiddle(); // Fetch the riddle from Firestore
+    fetchEndTime(); // Fetch the countdown end time from Firestore
+  }
+
+  @override
+  void dispose() {
+    countdownTimer?.cancel(); // Cancel the timer when the widget is disposed
+    super.dispose();
+  }
+
+  // Fetch the countdown end time from Firestore
+  Future<void> fetchEndTime() async {
+    try {
+      DocumentSnapshot snapshot = await FirebaseFirestore.instance
+          .collection('CountdownTimers')
+          .doc('riddleCountdown')
+          .get();
+
+      if (snapshot.exists) {
+        Timestamp firestoreEndTime = snapshot['endTime'];
+        endTime = firestoreEndTime.toDate();
+
+        startCountdown(); // Start the countdown timer
+      } else {
+        setState(() {
+          errorMessage = 'Countdown end time not found.';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        errorMessage = 'Error fetching countdown: $e';
+      });
+    }
+  }
+
+  // Start the countdown timer
+  void startCountdown() {
+    if (endTime == null) return;
+
+    countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      final now = DateTime.now();
+      final remaining = endTime!.difference(now);
+
+      if (remaining.isNegative) {
+        timer.cancel();
+        // Redirect to ProblemStatementPage when the countdown ends
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const ProblemStatementPage()),
+        );
+      } else {
+        setState(() {
+          countdownDuration = remaining;
+        });
+      }
+    });
+  }
+
   // Fetch riddle data from Firestore
   Future<void> fetchRiddle() async {
     try {
-      // Fetch all documents from the 'RiddlesQues' collection
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
           .collection('RiddlesQues')
           .get();
 
       if (querySnapshot.docs.isNotEmpty) {
-        // Randomly select a riddle from the fetched documents
-        var randomDoc = querySnapshot.docs[Random().nextInt(querySnapshot.docs.length)];
+        var randomDoc =
+        querySnapshot.docs[Random().nextInt(querySnapshot.docs.length)];
 
         setState(() {
           question = randomDoc['riddle'];
@@ -53,8 +117,7 @@ class _RiddlePageState extends State<RiddlePage> {
   // Check if the answer is correct
   void checkAnswer() {
     if (userAnswer.trim().toLowerCase() == correctAnswer?.toLowerCase()) {
-      // Answer is correct, proceed to next page
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const ProblemStatementPage()),
       );
@@ -65,10 +128,11 @@ class _RiddlePageState extends State<RiddlePage> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    fetchRiddle();  // Fetch riddle when the page is loaded
+  // Format the remaining time as MM:SS
+  String formatTime(Duration duration) {
+    String minutes = duration.inMinutes.toString().padLeft(2, '0');
+    String seconds = (duration.inSeconds % 60).toString().padLeft(2, '0');
+    return "$minutes:$seconds";
   }
 
   @override
@@ -76,29 +140,35 @@ class _RiddlePageState extends State<RiddlePage> {
     return Scaffold(
       appBar: AppBar(title: const Text('Riddle Time')),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator()) // Show loading indicator while fetching data
+          ? const Center(child: CircularProgressIndicator())
           : Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             userDetailWidget(),
-            SizedBox(height: 50,),
-            GlobalCountDown(),
+            const SizedBox(height: 50),
+            // Countdown Timer Display
+            Text(
+              "Time Remaining: ${formatTime(countdownDuration)}",
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.red,
+              ),
+            ),
+            const SizedBox(height: 20),
             // Display the riddle question
             Text(
               question ?? 'Loading question...',
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                  fontSize: 24, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
             TextField(
-              onTap: _resetErrorMessage,
-              onChanged: (value) {
-                setState(() {
-                  userAnswer = value;
-                });
-              },
+              onTap: () => setState(() => errorMessage = ''),
+              onChanged: (value) => setState(() => userAnswer = value),
               decoration: const InputDecoration(
                 hintText: 'Your answer',
                 border: OutlineInputBorder(),
@@ -110,7 +180,6 @@ class _RiddlePageState extends State<RiddlePage> {
               child: const Text('Submit Answer'),
             ),
             const SizedBox(height: 20),
-            // Show error message if the answer is incorrect
             if (errorMessage.isNotEmpty)
               Text(
                 errorMessage,
@@ -121,10 +190,4 @@ class _RiddlePageState extends State<RiddlePage> {
       ),
     );
   }
-  void _resetErrorMessage() {
-    setState(() {
-      errorMessage = "";
-    });
-  }
 }
-

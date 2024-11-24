@@ -18,139 +18,161 @@ class _ProblemStatementPageState extends State<ProblemStatementPage> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-        onWillPop: () async {
-          // Return false to prevent the back action
-          return false;
-        },
-        child: Scaffold(
-          appBar: AppBar(
-            title: const Text("Problem Statements"),
-            backgroundColor: Colors.blueAccent,
-          ),
-          body: StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection('ProblemStatements')
-                .snapshots(), // Listen for real-time updates
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
+      onWillPop: () async => false, // Prevent back navigation
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text("Problem Statements"),
+          backgroundColor: Colors.blueAccent,
+        ),
+        body: StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('ProblemStatements')
+              .snapshots(), // Listen for real-time updates
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-              if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}'));
-              }
+            if (snapshot.hasError) {
+              return Center(child: Text('Error: ${snapshot.error}'));
+            }
 
-              final problemStatements = snapshot.data?.docs ?? [];
+            final problemStatements = snapshot.data?.docs ?? [];
 
-              return ListView.builder(
-                itemCount: problemStatements.length,
-                itemBuilder: (context, index) {
-                  final problem = problemStatements[index];
-                  final isLocked = problem["isLocked"] ?? false;
-                  final lockedBy = problem["lockedBy"];
-                  final isSelected = lockedBy == currentUserId;
+            // Separate the selected problem(s) and other problems
+            final selectedProblems = problemStatements.where((problem) {
+              return problem['lockedBy'] == currentUserId;
+            }).toList();
 
-                  // Get the expanded state from local map
-                  final isExpanded = expandedStates[problem.id] ?? false;
+            final otherProblems = problemStatements.where((problem) {
+              return problem['lockedBy'] != currentUserId;
+            }).toList();
 
-                  return Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      elevation: 5,
-                      child: Column(
-                        children: [
-                          ListTile(
-                            title: Text(
-                              problem["title"],
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            leading: Icon(
-                              isLocked
-                                  ? Icons.lock // Locked icon
-                                  : Icons.lock_open, // Unlocked icon
-                              color: isLocked ? Colors.red : Colors.green,
-                            ),
-                            trailing: Icon(isExpanded
-                                ? Icons.arrow_drop_up
-                                : Icons.arrow_drop_down),
-                            onTap: () {
-                              setState(() {
-                                // Toggle the expansion state locally
-                                expandedStates[problem.id] = !isExpanded;
-                              });
-                            },
-                          ),
-                          if (isExpanded) ...[
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16.0,
-                                vertical: 8.0,
-                              ),
-                              child: Text(
-                                problem["details"],
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.black54,
-                                ),
-                              ),
-                            ),
-                            // Display the Select button if the problem is not locked
-                            if (!isLocked)
-                              ElevatedButton(
-                                onPressed: isSelected
-                                    ? null
-                                    : () async {
-                                  if (await _checkIfUserHasLockedProblem()) {
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                            "You can only select one problem at a time."),
-                                      ),
-                                    );
-                                  } else {
-                                    lockProblemStatement(problem.id);
-                                  }
-                                },
-                                child: isSelected
-                                    ? const Text(
-                                    "You have selected this problem")
-                                    : const Text("Select this Problem"),
-                              ),
-                            // Show a message if the problem is already locked by the current user
-                            if (isSelected)
-                              const Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: Text(
-                                  "You have selected this problem.",
-                                  style: TextStyle(color: Colors.green),
-                                ),
-                              ),
-                            // Display if the problem is already locked by someone else
-                            if (isLocked && !isSelected)
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(
-                                  "This problem is locked by another user.",
-                                  style: TextStyle(color: Colors.red),
-                                ),
-                              ),
-                          ],
-                        ],
+            // Combine the lists: selected problems at the top
+            final sortedProblems = [...selectedProblems, ...otherProblems];
+
+            return ListView.builder(
+              itemCount: sortedProblems.length,
+              itemBuilder: (context, index) {
+                final problem = sortedProblems[index];
+                final isLocked = problem["isLocked"] ?? false;
+                final lockedBy = problem["lockedBy"];
+                final isSelected = lockedBy == currentUserId;
+
+                final isExpanded = expandedStates[problem.id] ?? false;
+
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Card(
+                    color: isSelected
+                        ? Colors.blue.shade50 // Distinct background for the selected problem
+                        : Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      side: BorderSide(
+                        color: isSelected ? Colors.blueAccent : Colors.grey,
+                        width: isSelected ? 2.0 : 1.0,
                       ),
                     ),
-                  );
-                },
-              );
-            },
-          ),
-        ));
+                    elevation: isSelected ? 8 : 5, // Higher elevation for selected problem
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ListTile(
+                          title: Text(
+                            problem["title"],
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                              color: isSelected ? Colors.blue : Colors.black,
+                            ),
+                          ),
+                          leading: Icon(
+                            isLocked ? Icons.lock : Icons.lock_open,
+                            color: isLocked ? Colors.red : Colors.green,
+                          ),
+                          trailing: Icon(isExpanded
+                              ? Icons.arrow_drop_up
+                              : Icons.arrow_drop_down),
+                          onTap: () {
+                            setState(() {
+                              expandedStates[problem.id] = !isExpanded;
+                            });
+                          },
+                        ),
+                        if (isExpanded) ...[
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16.0,
+                              vertical: 8.0,
+                            ),
+                            child: Text(
+                              problem["details"],
+                              style: const TextStyle(
+                                fontSize: 16,
+                                color: Colors.black54,
+                              ),
+                            ),
+                          ),
+                          if (!isLocked)
+                            ElevatedButton(
+                              onPressed: isSelected
+                                  ? null
+                                  : () async {
+                                if (await _checkIfUserHasLockedProblem()) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                          "You can only select one problem at a time."),
+                                    ),
+                                  );
+                                } else {
+                                  lockProblemStatement(problem.id);
+                                }
+                              },
+                              child: isSelected
+                                  ? const Text("You have selected this problem")
+                                  : const Text("Select this Problem"),
+                            ),
+                          ElevatedButton(
+                            onPressed: isSelected
+                                ? () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ProblemDetailsPage(
+                                      problemId: problem.id),
+                                ),
+                              );
+                            }
+                                : null,
+                            child: const Text("View Problem"),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                              isSelected ? Colors.green : Colors.grey,
+                            ),
+                          ),
+                          if (isLocked && !isSelected)
+                            const Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Text(
+                                "This problem is locked by another user.",
+                                style: TextStyle(color: Colors.red),
+                              ),
+                            ),
+                        ],
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
   }
 
   // Lock a problem statement for the current user
@@ -178,13 +200,8 @@ class _ProblemStatementPageState extends State<ProblemStatementPage> {
         });
       });
 
-      // Redirect to the details page for the selected problem
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ProblemDetailsPage(problemId: problemId),
-        ),
-      );
+      // Refresh UI after locking the problem
+      setState(() {});
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error locking problem: $e")),
@@ -195,7 +212,6 @@ class _ProblemStatementPageState extends State<ProblemStatementPage> {
   // Check if the user has already locked a problem
   Future<bool> _checkIfUserHasLockedProblem() async {
     try {
-      // Query to find if the user has already locked a problem
       final result = await FirebaseFirestore.instance
           .collection('ProblemStatements')
           .where("lockedBy", isEqualTo: currentUserId)
