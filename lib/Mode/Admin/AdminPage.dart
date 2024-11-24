@@ -85,9 +85,27 @@ class _AdminPageState extends State<AdminPage> {
     }
   }
 
+  // Toggle lock status for a problem statement
+  Future<void> toggleProblemLock(DocumentSnapshot doc) async {
+    try {
+      bool isLocked = doc['isLocked'] ?? false;
+      String? lockedBy = doc['lockedBy'];
 
+      // Update lock status and lockedBy field
+      await doc.reference.update({
+        'isLocked': !isLocked,
+        'lockedBy': isLocked ? null : 'Admin', // Set to 'Admin' or null based on current state
+      });
 
-
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(isLocked ? 'Problem unlocked.' : 'Problem locked.')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error toggling problem lock: $e")),
+      );
+    }
+  }
 
   @override
   void initState() {
@@ -104,7 +122,6 @@ class _AdminPageState extends State<AdminPage> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          // mainAxisAlignment: MainAxisAlignment.start,
           children: [
             const Text(
               'Configure Event Timing',
@@ -195,15 +212,22 @@ class _AdminPageState extends State<AdminPage> {
             ),
 
             // ------------------------------------------------ Problem Statement Reset ---------
-
             Divider(),
+            const Text(
+              'Configure Problem Statement Status',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 15),
 
             ElevatedButton(
               onPressed: resetProblemLocks,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blueAccent, // Red color for reset button
+                backgroundColor: Colors.blueAccent,
               ),
-              child: const Text("Reset All Problem Statements",style: TextStyle(color: Colors.white),),
+              child: const Text(
+                "Reset All Problem Statements",
+                style: TextStyle(color: Colors.white),
+              ),
             ),
             const SizedBox(height: 20),
             Expanded(
@@ -227,9 +251,16 @@ class _AdminPageState extends State<AdminPage> {
                       return ListTile(
                         title: Text(problem['title']),
                         subtitle: Text('Locked by: ${problem['lockedBy'] ?? "None"}'),
-                        trailing: Icon(
-                          problem['isLocked'] == true ? Icons.lock : Icons.lock_open,
-                          color: problem['isLocked'] == true ? Colors.red : Colors.green,
+                        trailing: IconButton(
+                          icon: Icon(
+                            problem['isLocked'] == true
+                                ? Icons.lock
+                                : Icons.lock_open,
+                            color: problem['isLocked'] == true
+                                ? Colors.red
+                                : Colors.green,
+                          ),
+                          onPressed: () => toggleProblemLock(problem),
                         ),
                       );
                     },
@@ -237,8 +268,6 @@ class _AdminPageState extends State<AdminPage> {
                 },
               ),
             ),
-
-
           ],
         ),
       ),
