@@ -60,6 +60,35 @@ class _AdminPageState extends State<AdminPage> {
     }
   }
 
+  Future<void> resetProblemLocks() async {
+    try {
+      // Get all documents from ProblemStatements collection
+      QuerySnapshot snapshot = await _firestore.collection('ProblemStatements').get();
+
+      // Loop through each document and update isLocked and lockedBy fields
+      for (var doc in snapshot.docs) {
+        await doc.reference.update({
+          'isLocked': false,
+          'lockedBy': null,
+        });
+      }
+
+      // Show a success message after updating
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("All problem statements have been reset.")),
+      );
+    } catch (e) {
+      // Handle errors
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error resetting problem statements: $e")),
+      );
+    }
+  }
+
+
+
+
+
   @override
   void initState() {
     super.initState();
@@ -75,7 +104,7 @@ class _AdminPageState extends State<AdminPage> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          // mainAxisAlignment: MainAxisAlignment.start,
           children: [
             const Text(
               'Configure Event Timing',
@@ -164,6 +193,52 @@ class _AdminPageState extends State<AdminPage> {
               onPressed: updateEventConfig,
               child: const Text('Save Changes'),
             ),
+
+            // ------------------------------------------------ Problem Statement Reset ---------
+
+            Divider(),
+
+            ElevatedButton(
+              onPressed: resetProblemLocks,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blueAccent, // Red color for reset button
+              ),
+              child: const Text("Reset All Problem Statements",style: TextStyle(color: Colors.white),),
+            ),
+            const SizedBox(height: 20),
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: _firestore.collection('ProblemStatements').snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  }
+
+                  final problemStatements = snapshot.data?.docs ?? [];
+
+                  return ListView.builder(
+                    itemCount: problemStatements.length,
+                    itemBuilder: (context, index) {
+                      final problem = problemStatements[index];
+                      return ListTile(
+                        title: Text(problem['title']),
+                        subtitle: Text('Locked by: ${problem['lockedBy'] ?? "None"}'),
+                        trailing: Icon(
+                          problem['isLocked'] == true ? Icons.lock : Icons.lock_open,
+                          color: problem['isLocked'] == true ? Colors.red : Colors.green,
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+
+
           ],
         ),
       ),
