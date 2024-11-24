@@ -3,7 +3,7 @@ import 'dart:math'; // Import for random number generation
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:codepunk/Mode/User/Pages/ProblemStatementPage.dart';
-import 'package:codepunk/Mode/User/Widgets/userDetailWidget.dart';
+
 
 class RiddlePage extends StatefulWidget {
   const RiddlePage({super.key});

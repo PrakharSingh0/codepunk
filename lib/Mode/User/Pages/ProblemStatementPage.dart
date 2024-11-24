@@ -179,8 +179,9 @@ class _ProblemStatementPageState extends State<ProblemStatementPage> {
               bottom: 16,
               right: 16,
               child: Container(
+                height: 50,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Colors.blueAccent,
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
@@ -189,9 +190,8 @@ class _ProblemStatementPageState extends State<ProblemStatementPage> {
                       offset: const Offset(0, 2),
                     ),
                   ],
-                ),
-                padding: const EdgeInsets.all(12),
-                child: GlobalCountDown(), // Your custom countdown widget
+                ),padding: EdgeInsets.all(5),
+                child: const GlobalCountDown(), // Your custom countdown widget
               ),
             ),
           ],

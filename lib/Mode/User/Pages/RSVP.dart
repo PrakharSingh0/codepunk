@@ -1,7 +1,6 @@
 import 'dart:async'; // Import Timer
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:codepunk/Mode/User/Pages/RiddlePage.dart';
-import 'package:codepunk/Mode/User/Widgets/userDetailWidget.dart';
 import 'package:firebase_auth/firebase_auth.dart'; // Import Firebase Auth
 import 'package:flutter/material.dart';
 
@@ -160,7 +159,6 @@ class _rsvpPageState extends State<rsvpPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.max,
                 children: [
-                  SizedBox(child: userDetailWidget()),
                   const Text(
                     "You are participating in the CodePunk event held by Driod Club.",
                     textAlign: TextAlign.center,
