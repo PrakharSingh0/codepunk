@@ -26,12 +26,12 @@ class _GlobalCountDownState extends State<GlobalCountDown> {
 
   void _fetchEventData() {
     FirebaseFirestore.instance
-        .collection('eventEndTime')
-        .doc('MHRS8BPRQua20Y8ocas5') // Replace with actual doc ID
+        .collection('eventTiming')
+        .doc('1sVOLXflwzOlTM8ZrhYt') // Replace with actual doc ID
         .snapshots()
         .listen((snapshot) {
       if (snapshot.exists) {
-        Timestamp eventTimestamp = snapshot['time'];
+        Timestamp eventTimestamp = snapshot['endTime'];
         eventEndTime = eventTimestamp.toDate();
 
         setState(() {

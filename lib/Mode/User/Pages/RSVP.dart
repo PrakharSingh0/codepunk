@@ -29,13 +29,13 @@ class _rsvpPageState extends State<rsvpPage> {
   // Fetch event start timestamp using snapshot for real-time updates
   void _fetchEventData() {
     FirebaseFirestore.instance
-        .collection('eventStartTime')
-        .doc('EcJTkrCTDQn28MjOSoYV')
+        .collection('eventTiming')
+        .doc('1sVOLXflwzOlTM8ZrhYt')
         .snapshots()
         .listen((snapshot) {
       if (snapshot.exists) {
         Timestamp eventTimestamp =
-            snapshot['time']; // Timestamp field in Firestore
+            snapshot['startTime']; // Timestamp field in Firestore
         eventStartTime = eventTimestamp.toDate();
 
         setState(() {

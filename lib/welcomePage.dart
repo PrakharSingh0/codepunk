@@ -13,13 +13,13 @@ class WelcomePage extends StatelessWidget {
     try {
       // Fetch the event's end time from Firestore
       DocumentSnapshot eventDoc = await FirebaseFirestore.instance
-          .collection('eventEndTime')  // Replace with your collection
-          .doc('MHRS8BPRQua20Y8ocas5')  // Replace with the actual document ID
+          .collection('eventTiming')  // Replace with your collection
+          .doc('1sVOLXflwzOlTM8ZrhYt')  // Replace with the actual document ID
           .get();
 
       if (eventDoc.exists) {
         // Get the event's end time and compare it with the current time
-        Timestamp eventEndTimestamp = eventDoc['time'];  // 'time' is the field storing the end time
+        Timestamp eventEndTimestamp = eventDoc['endTime'];  // 'time' is the field storing the end time
         DateTime eventEndTime = eventEndTimestamp.toDate();
 
         if (eventEndTime.isBefore(DateTime.now())) {

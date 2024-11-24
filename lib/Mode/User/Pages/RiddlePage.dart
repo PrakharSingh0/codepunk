@@ -40,13 +40,14 @@ class _RiddlePageState extends State<RiddlePage> {
   Future<void> fetchEndTime() async {
     try {
       DocumentSnapshot snapshot = await FirebaseFirestore.instance
-          .collection('CountdownTimers')
-          .doc('riddleCountdown')
+          .collection('eventTiming')
+          .doc('1sVOLXflwzOlTM8ZrhYt')
           .get();
 
       if (snapshot.exists) {
-        Timestamp firestoreEndTime = snapshot['endTime'];
-        endTime = firestoreEndTime.toDate();
+        Timestamp firestoreEndTime = snapshot['startTime'];
+        DateTime time = firestoreEndTime.toDate();
+        endTime = time.add(const Duration(minutes: 30));
 
         startCountdown(); // Start the countdown timer
       } else {
@@ -146,7 +147,6 @@ class _RiddlePageState extends State<RiddlePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            userDetailWidget(),
             const SizedBox(height: 50),
             // Countdown Timer Display
             Text(
