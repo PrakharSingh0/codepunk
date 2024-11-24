@@ -13,7 +13,7 @@ Future<void> main() async {
   runApp(
     const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: welcomePage(),
+      home: WelcomePage(),
     ),
   ); //runApp
 }

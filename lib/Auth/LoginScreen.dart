@@ -1,7 +1,6 @@
 import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // Import Firebase Auth
 import 'package:flutter/material.dart';
-
 import '../Mode/User/Pages/RSVP.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -20,7 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
   bool _passwordVisible = false;
 
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance; // Initialize Firebase Auth
 
   String? validateInput(String email, String password) {
     if (email.isEmpty || password.isEmpty) {
@@ -28,8 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     // Simple regex for email validation
-    String emailPattern =
-        r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$";
+    String emailPattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$";
     RegExp emailRegex = RegExp(emailPattern);
 
     if (!emailRegex.hasMatch(email)) {
@@ -46,7 +44,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> checkCredential() async {
     setState(() {
       isLoading = true;
-      errorMassage = '';
+      errorMassage = ''; // Clear previous error messages
     });
 
     String email = _emailController.text.trim();
@@ -55,53 +53,69 @@ class _LoginScreenState extends State<LoginScreen> {
     // Input validation
     String? validationError = validateInput(email, password);
     if (validationError != null) {
-      Timer(Duration(milliseconds: delayTime), () {
-        setState(() {
-          errorMassage = validationError;
-          isLoading = false;
-        });
+      // Update the UI immediately
+      setState(() {
+        errorMassage = validationError;
+        isLoading = false;
       });
       return;
     }
 
     try {
+      // Use Firebase Auth to sign in with email and password
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
-      final QuerySnapshot userSnapshot = await _firestore
-          .collection('users')
-          .where('email', isEqualTo: email)
-          .where('password', isEqualTo: password)
-          .get();
-
-      if (userSnapshot.docs.isNotEmpty) {
-        // If credentials are valid, navigate to RSVP page
-        Timer(Duration(milliseconds: delayTime), () {
-          setState(() {
-            isLoading = false;
-          });
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const rsvpPage()),
-          );
+      if (userCredential.user != null) {
+        // If user credentials are valid, navigate to RSVP page
+        setState(() {
+          isLoading = false;
         });
-      } else {
-        // Invalid credentials
-        Timer(Duration(milliseconds: delayTime), () {
-          setState(() {
-            errorMassage = "Incorrect email or password.";
-            isLoading = false;
-          });
-          _emailController.clear();
-          _passwordController.clear();
-        });
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const rsvpPage()),
+        );
       }
-    } catch (e) {
+    } on FirebaseAuthException catch (e) {
+      // Handle FirebaseAuthException with more specific cases
+      String errorMessage;
+      switch (e.code) {
+        case 'user-not-found':
+          errorMessage = "No user found for that email.";
+          break;
+        case 'wrong-password':
+          errorMessage = "Wrong password provided.";
+          break;
+        case 'invalid-email':
+          errorMessage = "The email address is not valid.";
+          break;
+        case 'user-disabled':
+          errorMessage = "This user has been disabled.";
+          break;
+        default:
+          errorMessage = "An error occurred. Please try again.";
+      }
 
+      // Update UI immediately
       setState(() {
-        errorMassage = "An error occurred. Please try again.";
+        errorMassage = errorMessage;
+        isLoading = false;
+      });
+
+      // Clear input fields for better UX
+      _emailController.clear();
+      _passwordController.clear();
+    } catch (e) {
+      // Catch any other errors
+      setState(() {
+        errorMassage = "An unexpected error occurred: ${e.toString()}";
         isLoading = false;
       });
     }
   }
+
 
   void _resetErrorMessage() {
     setState(() {
@@ -178,8 +192,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 if (errorMassage != null && errorMassage!.isNotEmpty)
                   Text(
                     errorMassage!,
-                    style: const TextStyle(
-                        color: Colors.redAccent, fontSize: 16),
+                    style:
+                        const TextStyle(color: Colors.redAccent, fontSize: 16),
                   ),
                 const SizedBox(height: 10),
                 SizedBox(
@@ -194,25 +208,26 @@ class _LoginScreenState extends State<LoginScreen> {
                         borderRadius: BorderRadius.circular(28),
                       ),
                       textStyle:
-                      const TextStyle(fontSize: 16, color: Colors.white),
+                          const TextStyle(fontSize: 16, color: Colors.white),
                     ),
                     child: isLoading
                         ? const SizedBox(
-                      height: 25,
-                      width: 25,
-                      child: CircularProgressIndicator(),
-                    )
+                            height: 25,
+                            width: 25,
+                            child: CircularProgressIndicator(),
+                          )
                         : const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.login,
-                          color: Colors.white,
-                        ),
-                        SizedBox(width: 10),
-                        Text('Log In', style: TextStyle(color: Colors.white)),
-                      ],
-                    ),
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.login,
+                                color: Colors.white,
+                              ),
+                              SizedBox(width: 10),
+                              Text('Log In',
+                                  style: TextStyle(color: Colors.white)),
+                            ],
+                          ),
                   ),
                 ),
               ],
