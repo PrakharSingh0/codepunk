@@ -1,4 +1,4 @@
-import 'package:codepunk/Auth/LogInPage.dart';
+import 'package:codepunk/Auth/LoginScreen.dart';
 import 'package:flutter/material.dart';
 
 class welcomePage extends StatelessWidget {
@@ -24,7 +24,7 @@ class welcomePage extends StatelessWidget {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const Loginpage()));
+                            builder: (context) => LoginScreen()));
                   },
                   child: const Text("Click me "))
             ],
