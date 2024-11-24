@@ -49,21 +49,20 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBZkkX1V0o64t_F_EHlduXQtmlH0Dnlbfc',
-    appId: '1:728777829488:android:d4decadac79c38bc0e18b5',
-    messagingSenderId: '728777829488',
-    projectId: 'codepunk-b6946',
-    storageBucket: 'codepunk-b6946.firebasestorage.app',
-  );
-
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyAC2RcwttfQDDQUIgMgKBsfXp7irOLa7uI',
-    appId: '1:728777829488:web:ae729e46bf310d630e18b5',
-    messagingSenderId: '728777829488',
-    projectId: 'codepunk-b6946',
-    authDomain: 'codepunk-b6946.firebaseapp.com',
-    storageBucket: 'codepunk-b6946.firebasestorage.app',
+    apiKey: 'AIzaSyCyX6NTrn8TkBNDIOaYX1MMwUCkihJoaPg',
+    appId: '1:361293916100:web:b4f2ceafe4f2378f7ee691',
+    messagingSenderId: '361293916100',
+    projectId: 'codepunk-flutter',
+    authDomain: 'codepunk-flutter.firebaseapp.com',
+    storageBucket: 'codepunk-flutter.firebasestorage.app',
   );
 
+  static const FirebaseOptions android = FirebaseOptions(
+    apiKey: 'AIzaSyC3YqlFwK_oP2d-5f_2RBFfjmzh1yz5Z_U',
+    appId: '1:361293916100:android:99d8fee1c6deddbc7ee691',
+    messagingSenderId: '361293916100',
+    projectId: 'codepunk-flutter',
+    storageBucket: 'codepunk-flutter.firebasestorage.app',
+  );
 }

@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "728777829488",
-    "project_id": "codepunk-b6946",
-    "storage_bucket": "codepunk-b6946.firebasestorage.app"
+    "project_number": "361293916100",
+    "project_id": "codepunk-flutter",
+    "storage_bucket": "codepunk-flutter.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:728777829488:android:d4decadac79c38bc0e18b5",
+        "mobilesdk_app_id": "1:361293916100:android:99d8fee1c6deddbc7ee691",
         "android_client_info": {
-          "package_name": "com.example.codepunk"
+          "package_name": "com.droid.codepunk"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBZkkX1V0o64t_F_EHlduXQtmlH0Dnlbfc"
+          "current_key": "AIzaSyC3YqlFwK_oP2d-5f_2RBFfjmzh1yz5Z_U"
         }
       ],
       "services": {
