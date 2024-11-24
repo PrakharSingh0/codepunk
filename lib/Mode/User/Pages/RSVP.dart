@@ -142,75 +142,81 @@ class _rsvpPageState extends State<rsvpPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(children: [
-        Center(
-          child: Container(
-            height: 350,
-            decoration: const BoxDecoration(
-                color: Color.fromRGBO(0, 0, 0, .75),
-                borderRadius: BorderRadius.all(Radius.circular(20))),
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                SizedBox(child: userDetailWidget()),
-                const Text(
-                  "You are participating in the CodePunk event held by Driod Club.",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 20, color: Colors.orange),
-                ),
-                const SizedBox(height: 50),
-                isLoading
-                    ? const CircularProgressIndicator() // Loading state
-                    : Column(
-                        children: [
-                          // Show the countdown timer
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                isTimerStarted
-                                    ? 'Event Starts In :'
-                                    : 'Loading...',
-                                style: const TextStyle(
-                                    fontSize: 30, color: Colors.white),
-                              ),
-                              const SizedBox(width: 10), // Add some spacing
-                              Text(
-                                isTimerStarted
-                                    ? formatDuration(remainingTime)
-                                    : 'Loading...',
-                                style: const TextStyle(
-                                    fontSize: 30, color: Colors.white),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 20),
-                          // RSVP Button (enabled when time ends)
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              minimumSize: const Size(200, 50),
-                              backgroundColor: isTimeEnded
-                                  ? Colors.orange
-                                  : Colors.grey, // Color when disabled
+    return WillPopScope(
+      onWillPop: () async {
+        // Return false to prevent the back action
+        return false;
+      },
+      child: Scaffold(
+        body: Stack(children: [
+          Center(
+            child: Container(
+              height: 350,
+              decoration: const BoxDecoration(
+                  color: Color.fromRGBO(0, 0, 0, .75),
+                  borderRadius: BorderRadius.all(Radius.circular(20))),
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  SizedBox(child: userDetailWidget()),
+                  const Text(
+                    "You are participating in the CodePunk event held by Driod Club.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 20, color: Colors.orange),
+                  ),
+                  const SizedBox(height: 50),
+                  isLoading
+                      ? const CircularProgressIndicator() // Loading state
+                      : Column(
+                          children: [
+                            // Show the countdown timer
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  isTimerStarted
+                                      ? 'Event Starts In :'
+                                      : 'Loading...',
+                                  style: const TextStyle(
+                                      fontSize: 30, color: Colors.white),
+                                ),
+                                const SizedBox(width: 10), // Add some spacing
+                                Text(
+                                  isTimerStarted
+                                      ? formatDuration(remainingTime)
+                                      : 'Loading...',
+                                  style: const TextStyle(
+                                      fontSize: 30, color: Colors.white),
+                                ),
+                              ],
                             ),
-                            onPressed: isTimeEnded
-                                ? _handleRSVP // Call _handleRSVP when time ends
-                                : null, // Disable button until the time ends
-                            child: const Text(
-                              "I, RSVP",
-                              style: TextStyle(fontSize: 18),
+                            const SizedBox(height: 20),
+                            // RSVP Button (enabled when time ends)
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                minimumSize: const Size(200, 50),
+                                backgroundColor: isTimeEnded
+                                    ? Colors.orange
+                                    : Colors.grey, // Color when disabled
+                              ),
+                              onPressed: isTimeEnded
+                                  ? _handleRSVP // Call _handleRSVP when time ends
+                                  : null, // Disable button until the time ends
+                              child: const Text(
+                                "I, RSVP",
+                                style: TextStyle(fontSize: 18),
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-              ],
+                          ],
+                        ),
+                ],
+              ),
             ),
           ),
-        ),
-      ]),
+        ]),
+      ),
     );
   }
 

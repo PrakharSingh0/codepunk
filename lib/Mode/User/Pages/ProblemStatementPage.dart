@@ -12,8 +12,7 @@ class ProblemStatementPage extends StatefulWidget {
 }
 
 class _ProblemStatementPageState extends State<ProblemStatementPage> {
-  String? currentUserId = FirebaseAuth.instance.currentUser
-      ?.email; // Replace with the actual user ID from authentication
+  String? currentUserId = FirebaseAuth.instance.currentUser?.email;
   Map<String, bool> expandedStates = {}; // Store the expanded state locally
 
   @override
@@ -71,6 +70,12 @@ class _ProblemStatementPageState extends State<ProblemStatementPage> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
+                            leading: Icon(
+                              isLocked
+                                  ? Icons.lock // Locked icon
+                                  : Icons.lock_open, // Unlocked icon
+                              color: isLocked ? Colors.red : Colors.green,
+                            ),
                             trailing: Icon(isExpanded
                                 ? Icons.arrow_drop_up
                                 : Icons.arrow_drop_down),
@@ -101,21 +106,21 @@ class _ProblemStatementPageState extends State<ProblemStatementPage> {
                                 onPressed: isSelected
                                     ? null
                                     : () async {
-                                        if (await _checkIfUserHasLockedProblem()) {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            const SnackBar(
-                                              content: Text(
-                                                  "You can only select one problem at a time."),
-                                            ),
-                                          );
-                                        } else {
-                                          lockProblemStatement(problem.id);
-                                        }
-                                      },
+                                  if (await _checkIfUserHasLockedProblem()) {
+                                    ScaffoldMessenger.of(context)
+                                        .showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                            "You can only select one problem at a time."),
+                                      ),
+                                    );
+                                  } else {
+                                    lockProblemStatement(problem.id);
+                                  }
+                                },
                                 child: isSelected
                                     ? const Text(
-                                        "You have selected this problem")
+                                    "You have selected this problem")
                                     : const Text("Select this Problem"),
                               ),
                             // Show a message if the problem is already locked by the current user
@@ -198,8 +203,7 @@ class _ProblemStatementPageState extends State<ProblemStatementPage> {
           .limit(1)
           .get();
 
-      return result
-          .docs.isNotEmpty; // If any locked problem is found, return true
+      return result.docs.isNotEmpty; // If any locked problem is found, return true
     } catch (e) {
       return false;
     }
