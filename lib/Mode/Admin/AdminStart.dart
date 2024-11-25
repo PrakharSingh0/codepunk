@@ -27,7 +27,7 @@ class _AdminstartState extends State<Adminstart> {
           MaterialPageRoute(builder: (context) => AdminPage()),
         );
       } else {
-        errorMessage = "You are not an admin!";
+        errorMessage = "You are not an admin! ";
       }
     });
   }
