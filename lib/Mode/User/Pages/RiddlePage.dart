@@ -47,7 +47,7 @@ class _RiddlePageState extends State<RiddlePage> {
       if (snapshot.exists) {
         Timestamp firestoreEndTime = snapshot['startTime'];
         DateTime time = firestoreEndTime.toDate();
-        endTime = time.add(const Duration(minutes: 30));
+        endTime = time.add(const Duration(minutes: 20));
 
         startCountdown(); // Start the countdown timer
       } else {
