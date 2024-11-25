@@ -47,7 +47,7 @@ class _RiddlePageState extends State<RiddlePage> {
       if (snapshot.exists) {
         Timestamp firestoreEndTime = snapshot['startTime'];
         DateTime time = firestoreEndTime.toDate();
-        endTime = time.add(const Duration(minutes: 30));
+        endTime = time.add(const Duration(minutes: 20));
 
         startCountdown(); // Start the countdown timer
       } else {
@@ -162,7 +162,7 @@ class _RiddlePageState extends State<RiddlePage> {
             Text(
               question ?? 'Loading question...',
               style: const TextStyle(
-                  fontSize: 24, fontWeight: FontWeight.bold),
+                  fontSize: 18, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
