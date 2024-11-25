@@ -13,8 +13,7 @@ class ProblemStatementPage extends StatefulWidget {
 }
 
 class _ProblemStatementPageState extends State<ProblemStatementPage> {
-  String? currentUserId = FirebaseAuth.instance.currentUser?.email;
-  Map<String, bool> expandedStates = {}; // Store the expanded state locally
+  String? currentUserId = FirebaseAuth.instance.currentUser?.email.toString().replaceAll("@droid.com","");
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +21,7 @@ class _ProblemStatementPageState extends State<ProblemStatementPage> {
       onWillPop: () async => false, // Prevent back navigation
       child: Scaffold(
         appBar: AppBar(
-          title: const Text("Problem Statements"),
+          title: const Text("Problem Statements",style: TextStyle(color: Colors.white),),
           backgroundColor: Colors.blueAccent,
         ),
         body: Stack(
@@ -62,13 +61,12 @@ class _ProblemStatementPageState extends State<ProblemStatementPage> {
                     final lockedBy = problem["lockedBy"];
                     final isSelected = lockedBy == currentUserId;
 
-                    final isExpanded = expandedStates[problem.id] ?? false;
-
                     return Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.all(5.0),
                       child: Card(
                         color: isSelected
-                            ? Colors.blue.shade50 // Distinct background for the selected problem
+                            ? Colors.blue
+                                .shade50 // Distinct background for the selected problem
                             : Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
@@ -77,96 +75,27 @@ class _ProblemStatementPageState extends State<ProblemStatementPage> {
                             width: isSelected ? 2.0 : 1.0,
                           ),
                         ),
-                        elevation: isSelected ? 8 : 5, // Higher elevation for selected problem
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ListTile(
-                              title: Text(
-                                problem["title"],
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: isSelected
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
-                                  color: isSelected ? Colors.blue : Colors.black,
-                                ),
-                              ),
-                              leading: Icon(
-                                isLocked ? Icons.lock : Icons.lock_open,
-                                color: isLocked ? Colors.red : Colors.green,
-                              ),
-                              trailing: Icon(isExpanded
-                                  ? Icons.arrow_drop_up
-                                  : Icons.arrow_drop_down),
-                              onTap: () {
-                                setState(() {
-                                  expandedStates[problem.id] = !isExpanded;
-                                });
-                              },
+                        elevation: isSelected
+                            ? 8
+                            : 5, // Higher elevation for selected problem
+                        child: ListTile(
+                          title: Text(
+                            problem["title"],
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                              color: isSelected ? Colors.blue : Colors.black,
                             ),
-                            if (isExpanded) ...[
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16.0,
-                                  vertical: 8.0,
-                                ),
-                                child: Text(
-                                  problem["details"],
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.black54,
-                                  ),
-                                ),
-                              ),
-                              if (!isLocked)
-                                ElevatedButton(
-                                  onPressed: isSelected
-                                      ? null
-                                      : () async {
-                                    if (await _checkIfUserHasLockedProblem()) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(
-                                          content: Text(
-                                              "You can only select one problem at a time."),
-                                        ),
-                                      );
-                                    } else {
-                                      lockProblemStatement(problem.id);
-                                    }
-                                  },
-                                  child: isSelected
-                                      ? const Text("You have selected this problem")
-                                      : const Text("Select this Problem"),
-                                ),
-                              ElevatedButton(
-                                onPressed: isSelected
-                                    ? () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => ProblemDetailsPage(
-                                          problemId: problem.id),
-                                    ),
-                                  );
-                                }
-                                    : null,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                  isSelected ? Colors.green : Colors.grey,
-                                ),
-                                child: const Text("View Problem"),
-                              ),
-                              if (isLocked && !isSelected)
-                                const Padding(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: Text(
-                                    "This problem is locked by another user.",
-                                    style: TextStyle(color: Colors.red),
-                                  ),
-                                ),
-                            ],
-                          ],
+                          ),
+                          leading: Icon(
+                            isLocked ? Icons.lock : Icons.lock_open,
+                            color: isLocked ? Colors.red : Colors.green,
+                          ),
+                          onTap: () {
+                            _showProblemDialog(context, problem);
+                          },
                         ),
                       ),
                     );
@@ -190,13 +119,216 @@ class _ProblemStatementPageState extends State<ProblemStatementPage> {
                       offset: const Offset(0, 2),
                     ),
                   ],
-                ),padding: EdgeInsets.all(5),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 15),
                 child: const GlobalCountDown(), // Your custom countdown widget
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  // Show a dialog with the problem details
+  void _showProblemDialog(BuildContext context, DocumentSnapshot problem) {
+    final isLocked = problem["isLocked"] ?? false;
+    final lockedBy = problem["lockedBy"];
+    final isSelected = lockedBy == currentUserId;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          title: const Row(
+            children: [
+              Icon(Icons.info, color: Colors.blue),
+              SizedBox(width: 8),
+              Text(
+                'Problem Details',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // PSID
+              Row(
+                children: [
+                  const Text(
+                    'PSID:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    problem['psid'] ?? 'No PSID',
+                    style: const TextStyle(color: Colors.blue),
+                  ),
+                ],
+              ),
+              const Divider(thickness: 1, height: 16),
+
+              // Title
+              Row(
+                children: [
+                  const Text(
+                    'Title:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      problem['title'] ?? 'No Title',
+                      style: const TextStyle(color: Colors.black),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                  ),
+                ],
+              ),
+              const Divider(thickness: 1, height: 16),
+
+              // Details
+              const Text(
+                'Details:',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                problem['details'] ?? 'No details available',
+                style: const TextStyle(color: Colors.grey),
+              ),
+              const Divider(thickness: 1, height: 16),
+
+              // Locked By
+              Row(
+                children: [
+                  const Text(
+                    'Locked By:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    problem['lockedBy'] ?? 'None',
+                    style: const TextStyle(color: Colors.orange),
+                  ),
+                ],
+              ),
+              const Divider(thickness: 1, height: 16),
+
+              // Lock Status
+              Row(
+                children: [
+                  const Text(
+                    'Locked:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    isLocked ? Icons.lock : Icons.lock_open,
+                    color: isLocked ? Colors.red : Colors.green,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    isLocked ? 'Yes' : 'No',
+                    style: TextStyle(
+                      color: isLocked ? Colors.red : Colors.green,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          actions: [
+            if (!isLocked) ...[
+              ElevatedButton.icon(
+                onPressed: isSelected
+                    ? null
+                    : () async {
+                        if (await _checkIfUserHasLockedProblem()) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                  "You can only select one problem at a time."),
+                            ),
+                          );
+                        } else {
+                          lockProblemStatement(problem.id);
+                          Navigator.pop(
+                              context); // Close the dialog after selection
+                        }
+                      },
+                icon: const Icon(
+                  Icons.lock,
+                  color: Colors.white,
+                ),
+                label: const Text(
+                  "Select this Problem",
+                  style: TextStyle(color: Colors.white),
+                ),
+                style: ElevatedButton.styleFrom(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  backgroundColor: Colors.blueAccent,
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                ),
+              ),
+            ],
+            if (isSelected) ...[
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ProblemDetailsPage(
+                        problemId: problem.id,
+                      ),
+                    ),
+                  );
+                },
+                icon: const Icon(
+                  Icons.visibility,
+                  color: Colors.white,
+                ),
+                label: const Text(
+                  "View Problem",
+                  style: TextStyle(color: Colors.white),
+                ),
+                style: ElevatedButton.styleFrom(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  backgroundColor: Colors.greenAccent,
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                ),
+              ),
+            ],
+            SizedBox(height: 5),
+            OutlinedButton.icon(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              icon: const Icon(Icons.close,color: Colors.black,),
+              label: const Text('Close',style: TextStyle(color: Colors.black),),
+              style: OutlinedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            )
+          ],
+        );
+      },
     );
   }
 
@@ -244,7 +376,8 @@ class _ProblemStatementPageState extends State<ProblemStatementPage> {
           .limit(1)
           .get();
 
-      return result.docs.isNotEmpty; // If any locked problem is found, return true
+      return result
+          .docs.isNotEmpty; // If any locked problem is found, return true
     } catch (e) {
       return false;
     }

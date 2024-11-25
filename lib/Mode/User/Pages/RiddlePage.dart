@@ -162,7 +162,7 @@ class _RiddlePageState extends State<RiddlePage> {
             Text(
               question ?? 'Loading question...',
               style: const TextStyle(
-                  fontSize: 24, fontWeight: FontWeight.bold),
+                  fontSize: 18, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
