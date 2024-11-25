@@ -24,7 +24,7 @@ class WelcomePage extends StatelessWidget {
 
         if (eventEndTime.isBefore(DateTime.now())) {
           // If the event time has passed, navigate to the EndPage
-          Navigator.pushReplacement(
+          Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const EventEndPage()),
           );

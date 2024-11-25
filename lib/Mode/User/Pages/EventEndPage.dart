@@ -22,7 +22,7 @@ class EventEndPage extends StatelessWidget {
               ElevatedButton(
                 onPressed: () {
                   // You can add logic to navigate to a new flow or exit the app
-                  // Navigator.pop(context); // Go back to the previous screen
+                  Navigator.pop(context); // Go back to the previous screen
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orangeAccent,
