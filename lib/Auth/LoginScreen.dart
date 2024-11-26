@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:firebase_auth/firebase_auth.dart'; // Import Firebase Auth
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../Mode/User/Pages/RSVP.dart';
 
@@ -19,14 +19,13 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
   bool _passwordVisible = false;
 
-  final FirebaseAuth _auth = FirebaseAuth.instance; // Initialize Firebase Auth
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   String? validateInput(String email, String password) {
     if (email.isEmpty || password.isEmpty) {
       return "Both Email & Password are required.";
     }
 
-    // Simple regex for email validation
     String emailPattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$";
     RegExp emailRegex = RegExp(emailPattern);
 
@@ -44,16 +43,14 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> checkCredential() async {
     setState(() {
       isLoading = true;
-      errorMassage = ''; // Clear previous error messages
+      errorMassage = '';
     });
 
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
 
-    // Input validation
     String? validationError = validateInput(email, password);
     if (validationError != null) {
-      // Update the UI immediately
       setState(() {
         errorMassage = validationError;
         isLoading = false;
@@ -62,14 +59,12 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     try {
-      // Use Firebase Auth to sign in with email and password
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
 
       if (userCredential.user != null) {
-        // If user credentials are valid, navigate to RSVP page
         setState(() {
           isLoading = false;
         });
@@ -79,7 +74,6 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     } on FirebaseAuthException catch (e) {
-      // Handle FirebaseAuthException with more specific cases
       String errorMessage;
       switch (e.code) {
         case 'user-not-found':
@@ -98,24 +92,20 @@ class _LoginScreenState extends State<LoginScreen> {
           errorMessage = "An error occurred. Please try again.";
       }
 
-      // Update UI immediately
       setState(() {
         errorMassage = errorMessage;
         isLoading = false;
       });
 
-      // Clear input fields for better UX
       _emailController.clear();
       _passwordController.clear();
     } catch (e) {
-      // Catch any other errors
       setState(() {
         errorMassage = "An unexpected error occurred: ${e.toString()}";
         isLoading = false;
       });
     }
   }
-
 
   void _resetErrorMessage() {
     setState(() {
@@ -128,30 +118,40 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: Center(
         child: Container(
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(colors: [
-              Color.fromRGBO(0, 0, 0, .5),
-              Color.fromRGBO(0, 0, 0, .8)
-            ]),
-            border: Border.all(width: 2, color: Colors.orange),
-            borderRadius: const BorderRadius.all(Radius.circular(40)),
+
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Color(0xFF111111),  // Dark background
+                Color(0xFF333333),  // Dark gradient
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            // borderRadius: BorderRadius.all(Radius.circular(40)),
           ),
-          width: 380,
-          height: 300,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 40),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                const Icon(
+                  Icons.computer,
+                  color: Colors.cyanAccent,
+                  size: 100,
+                ),
+                const SizedBox(height: 20),
                 const Text(
                   'Log In',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: Colors.cyanAccent,
+                    letterSpacing: 1.5,
                   ),
                 ),
                 const SizedBox(height: 16),
+                // Email Input
                 TextField(
                   onTap: _resetErrorMessage,
                   style: const TextStyle(color: Colors.white54),
@@ -160,11 +160,34 @@ class _LoginScreenState extends State<LoginScreen> {
                     labelStyle: TextStyle(color: Colors.white),
                     hintText: "Team001@droid.com",
                     labelText: 'Email',
+                    filled: true,
+                    fillColor: Color(0xFF1A1A1A),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(28)),
+                      borderSide: BorderSide(
+                        color: Colors.cyanAccent,
+                        width: 2,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(28)),
+                      borderSide: BorderSide(
+                        color: Colors.cyanAccent,
+                        width: 3,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(28)),
+                      borderSide: BorderSide(
+                        color: Colors.cyanAccent,
+                        width: 2,
+                      ),
+                    ),
                   ),
                   keyboardType: TextInputType.emailAddress,
                 ),
-                // Password ----------------->
                 const SizedBox(height: 16),
+                // Password Input
                 TextField(
                   onTap: _resetErrorMessage,
                   style: const TextStyle(color: Colors.white54),
@@ -173,6 +196,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   decoration: InputDecoration(
                     labelStyle: const TextStyle(color: Colors.white),
                     labelText: 'Password',
+                    filled: true,
+                    fillColor: const Color(0xFF1A1A1A),
                     suffixIcon: IconButton(
                       icon: Icon(
                         _passwordVisible
@@ -186,50 +211,64 @@ class _LoginScreenState extends State<LoginScreen> {
                         });
                       },
                     ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(28)),
+                      borderSide: const BorderSide(
+                        color: Colors.cyanAccent,
+                        width: 2,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(28)),
+                      borderSide: const BorderSide(
+                        color: Colors.cyanAccent,
+                        width: 3,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 10),
                 if (errorMassage != null && errorMassage!.isNotEmpty)
                   Text(
                     errorMassage!,
-                    style:
-                        const TextStyle(color: Colors.redAccent, fontSize: 16),
+                    style: const TextStyle(color: Colors.redAccent, fontSize: 16),
                   ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 20),
+                // Login Button
                 SizedBox(
                   width: 150,
                   height: 50,
                   child: ElevatedButton(
                     onPressed: checkCredential,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orangeAccent,
+                      backgroundColor: Colors.cyanAccent,
                       padding: const EdgeInsets.symmetric(vertical: 0),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(28),
                       ),
                       textStyle:
-                          const TextStyle(fontSize: 16, color: Colors.white),
+                      const TextStyle(fontSize: 16, color: Colors.white),
                     ),
                     child: isLoading
                         ? const SizedBox(
-                            height: 25,
-                            width: 25,
-                            child: CircularProgressIndicator(),
-                          )
+                      height: 25,
+                      width: 25,
+                      child: CircularProgressIndicator(),
+                    )
                         : const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.login,
-                                color: Colors.white,
-                              ),
-                              SizedBox(width: 10),
-                              Text('Log In',
-                                  style: TextStyle(color: Colors.white)),
-                            ],
-                          ),
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.login,
+                          color: Colors.black,
+                        ),
+                        SizedBox(width: 10),
+                        Text('Log In', style: TextStyle(color: Colors.black)),
+                      ],
+                    ),
                   ),
                 ),
+                const SizedBox(height: 20),
               ],
             ),
           ),

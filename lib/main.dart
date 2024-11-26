@@ -14,7 +14,7 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   runApp(
-    const MaterialApp(
+     const MaterialApp(
       debugShowCheckedModeBanner: false,
       home: WelcomePage(),
     ),

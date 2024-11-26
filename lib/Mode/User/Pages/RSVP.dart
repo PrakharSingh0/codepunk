@@ -1,7 +1,7 @@
-import 'dart:async'; // Import Timer
+import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:codepunk/Mode/User/Pages/RiddlePage.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Import Firebase Auth
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class rsvpPage extends StatefulWidget {
@@ -14,10 +14,10 @@ class rsvpPage extends StatefulWidget {
 class _rsvpPageState extends State<rsvpPage> {
   late DateTime eventStartTime;
   late Duration remainingTime;
-  Timer? _timer; // Nullable to avoid unnecessary calls
+  Timer? _timer;
   bool isTimerStarted = false;
-  bool isTimeEnded = false; // Flag to check if time has ended
-  bool isLoading = true; // Flag for loading state
+  bool isTimeEnded = false;
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -25,7 +25,6 @@ class _rsvpPageState extends State<rsvpPage> {
     _fetchEventData();
   }
 
-  // Fetch event start timestamp using snapshot for real-time updates
   void _fetchEventData() {
     FirebaseFirestore.instance
         .collection('eventTiming')
@@ -33,29 +32,24 @@ class _rsvpPageState extends State<rsvpPage> {
         .snapshots()
         .listen((snapshot) {
       if (snapshot.exists) {
-        Timestamp eventTimestamp =
-            snapshot['startTime']; // Timestamp field in Firestore
+        Timestamp eventTimestamp = snapshot['startTime'];
         eventStartTime = eventTimestamp.toDate();
 
         setState(() {
           remainingTime = eventStartTime.difference(DateTime.now());
           isTimerStarted = true;
-          isLoading = false; // Stop loading after data is fetched
-          isTimeEnded =
-              remainingTime <= Duration.zero; // Check time immediately
+          isLoading = false;
+          isTimeEnded = remainingTime <= Duration.zero;
         });
 
-        // Start the countdown timer only if the event hasn't ended
         if (!isTimeEnded) {
           _startCountdown();
         } else {
-          // Ensure remaining time stays at zero when time is over
           setState(() {
             remainingTime = Duration.zero;
           });
         }
       } else {
-        // Handle case where event data doesn't exist
         setState(() {
           isLoading = false;
         });
@@ -66,60 +60,50 @@ class _rsvpPageState extends State<rsvpPage> {
     });
   }
 
-  // Starts the countdown timer and updates every second
   void _startCountdown() {
-    _timer?.cancel(); // Cancel any previous timer if running
+    _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         remainingTime = eventStartTime.difference(DateTime.now());
         if (remainingTime <= Duration.zero) {
           remainingTime = Duration.zero;
-          isTimeEnded = true; // Set the flag when time ends
-          _timer?.cancel(); // Stop the timer when it hits zero
+          isTimeEnded = true;
+          _timer?.cancel();
         }
       });
     });
   }
 
-  // Format the duration to hh:mm:ss format
   String formatDuration(Duration duration) {
     return '${duration.inHours.toString().padLeft(2, '0')}:${(duration.inMinutes % 60).toString().padLeft(2, '0')}:${(duration.inSeconds % 60).toString().padLeft(2, '0')}';
   }
 
-  // Handle RSVP button press
   Future<void> _handleRSVP() async {
-    // Get the current user email from FirebaseAuth
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      String userEmail =
-          user.email ?? 'Unknown'; // Default to 'Unknown' if no email exists
-      DateTime timestamp = DateTime.now(); // Current timestamp
-
-      // Reference to the Firestore collection
+      String userEmail = user.email ?? 'Unknown';
+      DateTime timestamp = DateTime.now();
       CollectionReference rsvpCollection =
-          FirebaseFirestore.instance.collection('rsvp');
+      FirebaseFirestore.instance.collection('rsvp');
 
-      // Check if an RSVP already exists for the user
       QuerySnapshot querySnapshot =
-          await rsvpCollection.where('teamID', isEqualTo: userEmail).get();
+      await rsvpCollection.where('teamID', isEqualTo: userEmail).get();
 
       if (querySnapshot.docs.isNotEmpty) {
-        // If RSVP exists, update the timestamp
-        String docId = querySnapshot.docs.first.id; // Get the document ID
+        String docId = querySnapshot.docs.first.id;
         await rsvpCollection.doc(docId).update({
-          'timestamp': timestamp, // Update the timestamp
-          'isPresent': true, // Ensure user presence is marked
+          'timestamp': timestamp,
+          'isPresent': true,
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('RSVP updated successfully!')),
         );
       } else {
-        // If RSVP doesn't exist, create a new one
         await rsvpCollection.add({
           'teamID': userEmail,
           'timestamp': timestamp,
-          'isPresent': true, // Store a bool value indicating user is present
+          'isPresent': true,
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -132,7 +116,6 @@ class _rsvpPageState extends State<rsvpPage> {
         MaterialPageRoute(builder: (context) => const RiddlePage()),
       );
     } else {
-      // Handle case where the user is not logged in
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please log in to RSVP')),
       );
@@ -143,84 +126,145 @@ class _rsvpPageState extends State<rsvpPage> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        // Return false to prevent the back action
-        return false;
+        return false; // Prevent back action
       },
       child: Scaffold(
-        body: Stack(children: [
-          Center(
-            child: Container(
-              height: 350,
-              decoration: const BoxDecoration(
-                  color: Color.fromRGBO(0, 0, 0, .75),
-                  borderRadius: BorderRadius.all(Radius.circular(20))),
-              padding: const EdgeInsets.all(20),
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF121212), Color(0xFF2E2E2E), Color(0xFF373737)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              stops: [0.1, 0.6, 0.9],
+            ),
+          ),
+          padding: const EdgeInsets.all(20),
+          child: Center(
+            child: SingleChildScrollView(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.max,
                 children: [
                   const Text(
-                    "You are participating in the CodePunk event held by Driod Club.",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 20, color: Colors.orange),
+                    "RSVP",
+                    style: TextStyle(
+                      fontSize: 50,
+                      color: Colors.cyanAccent,
+                      fontFamily: 'Orbitron', // Cyberpunk font
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 3,
+                      shadows: [
+                        Shadow(blurRadius: 10, color: Colors.cyan, offset: Offset(0, 0)),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 50),
-                  isLoading
-                      ? const CircularProgressIndicator() // Loading state
-                      : Column(
-                          children: [
-                            // Show the countdown timer
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  isTimerStarted
-                                      ? 'Event Starts In :'
-                                      : 'Loading...',
-                                  style: const TextStyle(
-                                      fontSize: 30, color: Colors.white),
-                                ),
-                                const SizedBox(width: 10), // Add some spacing
-                                Text(
-                                  isTimerStarted
-                                      ? formatDuration(remainingTime)
-                                      : 'Loading...',
-                                  style: const TextStyle(
-                                      fontSize: 30, color: Colors.white),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 20),
-                            // RSVP Button (enabled when time ends)
-                            ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                minimumSize: const Size(200, 50),
-                                backgroundColor: isTimeEnded
-                                    ? Colors.orange
-                                    : Colors.grey, // Color when disabled
-                              ),
-                              onPressed: isTimeEnded
-                                  ? _handleRSVP // Call _handleRSVP when time ends
-                                  : null, // Disable button until the time ends
-                              child: const Text(
-                                "I, RSVP",
-                                style: TextStyle(fontSize: 18),
-                              ),
-                            ),
-                          ],
+                  const SizedBox(height: 20),
+                  Container(
+                    width: double.infinity, // Make width flexible
+                    constraints: const BoxConstraints(maxWidth: 400), // Maximum width constraint
+                    decoration: BoxDecoration(
+                      border: Border.all(width: 1, color: Colors.cyanAccent),
+                      borderRadius: const BorderRadius.all(Radius.circular(40)),
+                      gradient: LinearGradient(
+                        colors: [Colors.black.withOpacity(0.8), Colors.blueGrey.withOpacity(0.3)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.cyanAccent.withOpacity(0.3),
+                          blurRadius: 10,
+                          spreadRadius: 5,
                         ),
+                      ],
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          isLoading
+                              ? const CircularProgressIndicator()
+                              : Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.access_time_filled,
+                                    color: Colors.cyanAccent,
+                                    size: 36,
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Text(
+                                    isTimerStarted
+                                        ? 'Event Starts In :'
+                                        : 'Loading...',
+                                    style: const TextStyle(
+                                      fontSize: 22,
+                                      color: Colors.cyanAccent,
+                                      fontFamily: 'Orbitron',
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Text(
+                                    isTimerStarted
+                                        ? formatDuration(remainingTime)
+                                        : 'Loading...',
+                                    style: const TextStyle(
+                                      fontSize: 22,
+                                      color: Colors.cyanAccent,
+                                      fontFamily: 'Orbitron',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 40),
+                              const Text(
+                                "Confirm your participation in CodePunk V.1 and get ready for an unforgettable experience! By proceeding, you're officially joining the Droid Club event.",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.orangeAccent,
+                                  fontFamily: 'RobotoMono',
+                                ),
+                              ),
+                              const SizedBox(height: 40),
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  minimumSize: const Size(220, 60),
+                                  backgroundColor: isTimeEnded
+                                      ? Colors.cyanAccent
+                                      : Colors.grey,
+                                  shadowColor:
+                                  Colors.cyanAccent.withOpacity(0.5),
+                                  elevation: 15,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(30)),
+                                ),
+                                onPressed: isTimeEnded ? _handleRSVP : null,
+                                child: const Text(
+                                  "I, RSVP",
+                                  style: TextStyle(
+                                      fontSize: 20, color: Colors.black, fontFamily: 'Orbitron'),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
           ),
-        ]),
+        ),
       ),
     );
   }
 
   @override
   void dispose() {
-    // Dispose the timer when the widget is disposed
     _timer?.cancel();
     super.dispose();
   }
