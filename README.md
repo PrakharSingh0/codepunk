@@ -8,13 +8,18 @@ This is a Andorid and Web Application for a Mini Hackathon named " < CodePunk V.
 
 ## Screenshots
 
-- Admin Control 
-![App Screenshot](https://github.com/user-attachments/assets/64908267-7f2b-4634-af78-d63096ac5689)
-![App Screenshot](https://github.com/user-attachments/assets/64908267-7f2b-4634-af78-d63096ac5689)
+- Admin Control
+
+  <img src="https://github.com/user-attachments/assets/64908267-7f2b-4634-af78-d63096ac5689" width="200">
+  <img src="https://github.com/user-attachments/assets/84b6d64b-8394-4b2e-9695-ca63c50a6bf8" width="200">
+  <img src="https://github.com/user-attachments/assets/1e737943-2ea4-461b-9ac1-5efe99017a19" width="200">
+  <img src="https://github.com/user-attachments/assets/16944df3-b69d-4c18-aeb6-b436fc1b40d0" width="200">
+  
 ![App Screenshot](https://github.com/user-attachments/assets/64908267-7f2b-4634-af78-d63096ac5689)
 ![App Screenshot](https://github.com/user-attachments/assets/64908267-7f2b-4634-af78-d63096ac5689)
 
-- Users 
+- Users
+- 
 ![image](https://github.com/user-attachments/assets/9f727dbf-3051-4125-a85f-60303fd19a7a)
 ![image](https://github.com/user-attachments/assets/9f10a486-51d7-44c4-917f-8620667da015)
 ![image](https://github.com/user-attachments/assets/f46ef2ee-24a4-47c1-af29-adb982049274)
