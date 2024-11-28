@@ -1,9 +1,8 @@
-import 'dart:async'; // Import for Timer
-import 'dart:math'; // Import for random number generation
+import 'dart:async';
+import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:codepunk/Mode/User/Pages/ProblemStatementPage.dart';
-
 
 class RiddlePage extends StatefulWidget {
   const RiddlePage({super.key});
@@ -20,23 +19,22 @@ class _RiddlePageState extends State<RiddlePage> {
   bool isLoading = true;
 
   Timer? countdownTimer;
-  Duration countdownDuration = Duration.zero; // Remaining time
-  DateTime? endTime; // End time fetched from Firestore
+  Duration countdownDuration = Duration.zero;
+  DateTime? endTime;
 
   @override
   void initState() {
     super.initState();
-    fetchRiddle(); // Fetch the riddle from Firestore
-    fetchEndTime(); // Fetch the countdown end time from Firestore
+    fetchRiddle();
+    fetchEndTime();
   }
 
   @override
   void dispose() {
-    countdownTimer?.cancel(); // Cancel the timer when the widget is disposed
+    countdownTimer?.cancel();
     super.dispose();
   }
 
-  // Fetch the countdown end time from Firestore
   Future<void> fetchEndTime() async {
     try {
       DocumentSnapshot snapshot = await FirebaseFirestore.instance
@@ -49,7 +47,7 @@ class _RiddlePageState extends State<RiddlePage> {
         DateTime time = firestoreEndTime.toDate();
         endTime = time.add(const Duration(minutes: 20));
 
-        startCountdown(); // Start the countdown timer
+        startCountdown();
       } else {
         setState(() {
           errorMessage = 'Countdown end time not found.';
@@ -62,7 +60,6 @@ class _RiddlePageState extends State<RiddlePage> {
     }
   }
 
-  // Start the countdown timer
   void startCountdown() {
     if (endTime == null) return;
 
@@ -72,7 +69,6 @@ class _RiddlePageState extends State<RiddlePage> {
 
       if (remaining.isNegative) {
         timer.cancel();
-        // Redirect to ProblemStatementPage when the countdown ends
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const ProblemStatementPage()),
@@ -85,7 +81,6 @@ class _RiddlePageState extends State<RiddlePage> {
     });
   }
 
-  // Fetch riddle data from Firestore
   Future<void> fetchRiddle() async {
     try {
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
@@ -115,7 +110,6 @@ class _RiddlePageState extends State<RiddlePage> {
     }
   }
 
-  // Check if the answer is correct
   void checkAnswer() {
     if (userAnswer.trim().toLowerCase() == correctAnswer?.toLowerCase()) {
       Navigator.pushReplacement(
@@ -129,7 +123,6 @@ class _RiddlePageState extends State<RiddlePage> {
     }
   }
 
-  // Format the remaining time as MM:SS
   String formatTime(Duration duration) {
     String minutes = duration.inMinutes.toString().padLeft(2, '0');
     String seconds = (duration.inSeconds % 60).toString().padLeft(2, '0');
@@ -139,53 +132,125 @@ class _RiddlePageState extends State<RiddlePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Riddle Time')),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const SizedBox(height: 50),
-            // Countdown Timer Display
-            Text(
-              "Time Remaining: ${formatTime(countdownDuration)}",
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.red,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF121212), Color(0xFF2E2E2E), Color(0xFF373737)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            stops: [0.1, 0.6, 0.9],
+          ),
+        ),
+        padding: const EdgeInsets.all(20),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                "RIDDLE TIME",
+                style: TextStyle(
+                  fontSize: 40,
+                  color: Colors.cyanAccent,
+                  fontFamily: 'Orbitron',
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 3,
+                  shadows: [
+                    Shadow(blurRadius: 10, color: Colors.cyan, offset: Offset(0, 0)),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-            // Display the riddle question
-            Text(
-              question ?? 'Loading question...',
-              style: const TextStyle(
-                  fontSize: 18, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              onTap: () => setState(() => errorMessage = ''),
-              onChanged: (value) => setState(() => userAnswer = value),
-              decoration: const InputDecoration(
-                hintText: 'Your answer',
-                border: OutlineInputBorder(),
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  border: Border.all(width: 1, color: Colors.cyanAccent),
+                  borderRadius: const BorderRadius.all(Radius.circular(40)),
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.black.withOpacity(0.8),
+                      Colors.blueGrey.withOpacity(0.3)
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.cyanAccent.withOpacity(0.3),
+                      blurRadius: 10,
+                      spreadRadius: 5,
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      "Time Remaining: ${formatTime(countdownDuration)}",
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red,
+                        fontFamily: 'Orbitron',
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      question ?? 'Loading question...',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.orangeAccent,
+                        fontFamily: 'RobotoMono',
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    TextField(
+                      onTap: () => setState(() => errorMessage = ''),
+                      onChanged: (value) => setState(() => userAnswer = value),
+                      decoration: InputDecoration(
+                        hintText: 'Your answer',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        filled: true,
+                        fillColor: Colors.white.withOpacity(0.1),
+                        hintStyle: const TextStyle(color: Colors.white70),
+                      ),
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(200, 50),
+                        backgroundColor: Colors.cyanAccent,
+                        shadowColor: Colors.cyanAccent.withOpacity(0.5),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                      ),
+                      onPressed: checkAnswer,
+                      child: const Text(
+                        'Submit Answer',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 18,
+                          fontFamily: 'Orbitron',
+                        ),
+                      ),
+                    ),
+                    if (errorMessage.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 20),
+                        child: Text(
+                          errorMessage,
+                          style: const TextStyle(color: Colors.red, fontSize: 16),
+                        ),
+                      ),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: checkAnswer,
-              child: const Text('Submit Answer'),
-            ),
-            const SizedBox(height: 20),
-            if (errorMessage.isNotEmpty)
-              Text(
-                errorMessage,
-                style: const TextStyle(color: Colors.red, fontSize: 16),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );

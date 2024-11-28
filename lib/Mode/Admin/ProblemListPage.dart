@@ -4,18 +4,22 @@ import 'package:flutter/material.dart';
 class ProblemListPage extends StatelessWidget {
   const ProblemListPage({super.key});
 
-  void _showAddProblemDialog(BuildContext context) {
+  void _showAddProblemDialog(BuildContext context, {DocumentSnapshot? problem}) {
     final _formKey = GlobalKey<FormState>();
-    final TextEditingController psidController = TextEditingController();
-    final TextEditingController titleController = TextEditingController();
-    final TextEditingController detailsController = TextEditingController();
-    bool isLocked = false;
+    final TextEditingController psidController = TextEditingController(
+        text: problem != null ? problem['psid'] ?? '' : '');
+    final TextEditingController titleController = TextEditingController(
+        text: problem != null ? problem['title'] ?? '' : '');
+    final TextEditingController detailsController = TextEditingController(
+        text: problem != null ? problem['details'] ?? '' : '');
+    bool isLocked = problem != null ? problem['isLocked'] ?? false : false;
+    bool isEdit = problem != null; // Check if we are editing an existing problem
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Add New Problem Statement'),
+          title: Text(isEdit ? 'Edit Problem Statement' : 'Add New Problem Statement'),
           content: Form(
             key: _formKey,
             child: SingleChildScrollView(
@@ -52,7 +56,7 @@ class ProblemListPage extends StatelessWidget {
                   const SizedBox(height: 10),
                   TextFormField(
                     controller: detailsController,
-                    maxLines: 3,
+                    maxLines: 5,
                     decoration: const InputDecoration(
                       labelText: 'Problem Details',
                       border: OutlineInputBorder(),
@@ -83,48 +87,45 @@ class ProblemListPage extends StatelessWidget {
               },
               child: const Text('Cancel'),
             ),
-            ElevatedButton(
+            ElevatedButton.icon(
               onPressed: () async {
                 if (_formKey.currentState?.validate() ?? false) {
                   try {
-                    // Check if PSID is unique
-                    final existing = await FirebaseFirestore.instance
-                        .collection('ProblemStatements')
-                        .where('psid', isEqualTo: psidController.text)
-                        .get();
-                    if (existing.docs.isNotEmpty) {
+                    if (isEdit) {
+                      // Update existing problem
+                      await problem?.reference.update({
+                        'title': titleController.text,
+                        'details': detailsController.text,
+                        'isLocked': isLocked,
+                      });
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('PSID already exists!')),
+                        const SnackBar(content: Text('Problem updated successfully!')),
                       );
-                      return;
+                    } else {
+                      // Add new problem
+                      await FirebaseFirestore.instance
+                          .collection('ProblemStatements')
+                          .add({
+                        'psid': psidController.text,
+                        'title': titleController.text,
+                        'details': detailsController.text,
+                        'isLocked': isLocked,
+                        'lockedBy': null,
+                      });
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Problem added successfully!')),
+                      );
                     }
-
-                    // Add the new problem statement to Firestore
-                    await FirebaseFirestore.instance
-                        .collection('ProblemStatements')
-                        .add({
-                      'psid': psidController.text,
-                      'title': titleController.text,
-                      'details': detailsController.text,
-                      'isLocked': isLocked,
-                      'lockedBy': null,
-                    });
-
                     Navigator.of(context).pop();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content:
-                          Text('Problem statement added successfully!')),
-                    );
                   } catch (e) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                          content: Text('Error adding problem statement: $e')),
+                      SnackBar(content: Text('Error: $e')),
                     );
                   }
                 }
               },
-              child: const Text('Add'),
+              icon: const Icon(Icons.update), // Update icon
+              label: Text(isEdit ? 'Update' : 'Add'), // Label depending on edit or add
             ),
           ],
         );
@@ -259,120 +260,7 @@ class ProblemListPage extends StatelessWidget {
                   ),
                   onTap: () {
                     // Show dialog with problem details
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
-                          title: const Row(
-                            children: [
-                              Icon(Icons.info, color: Colors.blue),
-                              SizedBox(width: 8),
-                              Text('Problem Details',
-                                  style:
-                                  TextStyle(fontWeight: FontWeight.bold)),
-                            ],
-                          ),
-                          content: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  const Text('PSID:',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold)),
-                                  const SizedBox(width: 8),
-                                  Text(problem['psid'],
-                                      style:
-                                      const TextStyle(color: Colors.blue)),
-                                ],
-                              ),
-                              const Divider(thickness: 1, height: 16),
-                              Row(
-                                children: [
-                                  const Text('Title:',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold)),
-                                  const SizedBox(width: 8),
-                                  Flexible(
-                                    child: Text(
-                                      problem['title'],
-                                      style:
-                                      const TextStyle(color: Colors.black),
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 1,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const Divider(thickness: 1, height: 16),
-                              const Text('Details:',
-                                  style:
-                                  TextStyle(fontWeight: FontWeight.bold)),
-                              const SizedBox(height: 4),
-                              Text(
-                                problem['details'],
-                                style: const TextStyle(color: Colors.grey),
-                              ),
-                              const Divider(thickness: 1, height: 16),
-                              Row(
-                                children: [
-                                  const Text('Locked By:',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold)),
-                                  const SizedBox(width: 8),
-                                  Text(problem['lockedBy'] ?? 'None',
-                                      style: const TextStyle(
-                                          color: Colors.orange)),
-                                ],
-                              ),
-                              const Divider(thickness: 1, height: 16),
-                              Row(
-                                children: [
-                                  const Text('Is Locked:',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold)),
-                                  const SizedBox(width: 8),
-                                  Icon(
-                                    problem['isLocked']
-                                        ? Icons.lock
-                                        : Icons.lock_open,
-                                    color: problem['isLocked']
-                                        ? Colors.red
-                                        : Colors.green,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    problem['isLocked'] ? 'Yes' : 'No',
-                                    style: TextStyle(
-                                      color: problem['isLocked']
-                                          ? Colors.red
-                                          : Colors.green,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          actions: [
-                            ElevatedButton.icon(
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                              icon: const Icon(Icons.close),
-                              label: const Text('Close'),
-                              style: ElevatedButton.styleFrom(
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8)),
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                    );
+                    _showAddProblemDialog(context, problem: problem);
                   },
                 ),
               );

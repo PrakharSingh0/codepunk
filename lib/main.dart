@@ -14,9 +14,9 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   runApp(
-    const MaterialApp(
+      MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: WelcomePage(),
+      home: Adminstart(),
     ),
   ); //runApp
 }
